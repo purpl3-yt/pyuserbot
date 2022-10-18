@@ -221,7 +221,7 @@ async def offline(_,msg):
 async def update(_,msg):
     await msg.edit('Обновление юзер бота!')
     check_version(True)
-    await msg.edit('Обновление успешно завершено! напишите .restart для рестарта')
+    await msg.edit('Обновление успешно завершено! перезапустите юзербота')
 
 #On messages
 @app.on_message(filters.all & ~ filters.private)
