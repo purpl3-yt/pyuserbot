@@ -7,6 +7,34 @@ def changestop(newstop):
     global stop
     stop = newstop
 
+def update():
+    import os,shutil
+    from download import download
+    files = ['userbot.py','version.txt','utils.py','main.py']
+    if not os.path.isdir('./newfiles'):
+        os.mkdir('./newfiles')
+    for i in files:
+        newfiles = download(
+            url=f'https://raw.githubusercontent.com/purpl3-yt/pyuserbot/master/{i}',path='./newfiles',replace=True,progressbar=True
+        )
+        os.remove(f'./{i}')
+        shutil.move('./newfiles/newfiles.part','./')
+        os.rename('./newfiles.part',f'./{i}')
+
+def check_version(force=False):
+    import requests
+    if force==False:
+        newversion = requests.get('https://raw.githubusercontent.com/purpl3-yt/pyuserbot/master/version.txt')
+        with open('version.txt') as f:
+            oldversion = f.read()
+            f.close()
+        if oldversion == newversion.text:
+            print('Userbot is up to date')
+        elif oldversion != newversion.text:
+            update()
+    elif force==True:
+        update()
+
 def text_animation(text):
     from random import choice
     symbols = ['!','@','#','$','%','^','&','*','(',')','{','}','[',']']

@@ -179,7 +179,8 @@ async def help(_, msg):
 .del -> Вы должны ответить на сообщение! - удаляет сообщение
 .getmsg -> Вы должны ответить на сообщение! - выводит данные сообщения в консоль
 .online - Делает вас всегда в онлайне
-.offline - Перестает быть в онлайне```
+.offline - Перестает быть в онлайне
+.update - обновляет юзер бота```
 ''')
 @app.on_message(filters.command('stop',prefixes='.') & filters.me)
 async def stop(_,msg):
@@ -210,38 +211,46 @@ async def online(_,msg):
         elif stoponline==True:
             stoponline=False
             break
-@app.on_message(filters.command('offline',prefixes='.'))
+@app.on_message(filters.command('offline',prefixes='.') & filters.me)
 async def offline(_,msg):
     global stoponline
     await warn(app,msg,'Перестаём быть в онлайне!')
     stoponline=True
+
+@app.on_message(filters.command('update',prefixes='.') & filters.me)
+async def update(_,msg):
+    await msg.edit('Обновление юзер бота!')
+    check_version(True)
+    await msg.edit('Обновление успешно завершено! напишите .restart для рестарта')
+
 #On messages
 @app.on_message(filters.all & ~ filters.private)
 async def write_self(_,msg):
-    if msg.from_user.is_self == True:
-        if str(htext.getstatus()).lower()=='t':
-                if str(msg.text).lower() == '.set htext f':htext.setstatus('t')
-                elif str(msg.text).lower() == '.set htext t':htext.setstatus('f')
-                else:
-                    while True:
-                        for i in text_animation(msg.text):
-                            await msg.edit(i)
-                            tbp = i
-                            await asyncio.sleep(0.03)
-                        break
+    if msg.from_user!=None:
+        if msg.from_user.is_self == True:
+            if str(htext.getstatus()).lower()=='t':
+                    if str(msg.text).lower() == '.set htext f':htext.setstatus('t')
+                    elif str(msg.text).lower() == '.set htext t':htext.setstatus('f')
+                    else:
+                        while True:
+                            for i in text_animation(msg.text):
+                                await msg.edit(i)
+                                tbp = i
+                                await asyncio.sleep(0.03)
+                            break
 
-        elif str(hideset.getstatus()).lower()=='t':
-            if str(msg.text).lower() == '.setting hide f':hideset.setstatus('t')
-            elif str(msg.text).lower() == '.setting hide t':hideset.setstatus('f')
-            else:await msg.edit('||'+msg.text[4:]+'||')
-    elif msg.from_user.is_self == False:
-        if str(autoreac.getstatus()).lower()=='t':
-            if str(msg.text).lower() == '.setting autoreac f':autoreac.setstatus('t')
-            elif str(msg.text).lower() == '.setting autoreac t':autoreac.setstatus('f')
-            else:
-                from random import choice
-                random_emoji = ['🔥','👍','💩']
-                await app.send_reaction(msg.chat.id, msg.id, choice(random_emoji))
+            elif str(hideset.getstatus()).lower()=='t':
+                if str(msg.text).lower() == '.setting hide f':hideset.setstatus('t')
+                elif str(msg.text).lower() == '.setting hide t':hideset.setstatus('f')
+                else:await msg.edit('||'+msg.text[4:]+'||')
+        elif msg.from_user.is_self == False:
+            if str(autoreac.getstatus()).lower()=='t':
+                if str(msg.text).lower() == '.setting autoreac f':autoreac.setstatus('t')
+                elif str(msg.text).lower() == '.setting autoreac t':autoreac.setstatus('f')
+                else:
+                    from random import choice
+                    random_emoji = ['🔥','👍','💩']
+                    await app.send_reaction(msg.chat.id, msg.id, choice(random_emoji))
 
 
 def run():#Run userbot
