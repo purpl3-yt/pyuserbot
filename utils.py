@@ -1,6 +1,5 @@
 from pyrogram import *
 from pyrogram.errors import FloodWait
-from time import sleep
 stop=False
 
 def changestop(newstop):
@@ -126,17 +125,21 @@ class Setting:
 
 #For messages
 async def warn(app,msg,warn: str,alt = False):
+    from asyncio import sleep
     if alt==False:
         await msg.edit('<code>'+str(warn)+'</code>')
-        sleep(3)
+        await sleep(3)
         await msg.delete()
     elif alt==False:
         warn_msg = await app.send_message(msg.chat.id,'<code>'+str(warn)+'</code>')
-        sleep(3)
+        await sleep(3)
         await warn_msg.delete()
 async def getprofile(msg):
     with open('version.txt') as f:
-        version = f.read() 
+        version = f.read()
+    import requests
+    git_ver = requests.get('https://raw.githubusercontent.com/purpl3-yt/pyuserbot/master/version.txt')
+    github_version = git_ver.text
     if msg.reply_to_message==None:
         name = msg.from_user.username
         is_premium = msg.from_user.is_premium
@@ -149,6 +152,7 @@ async def getprofile(msg):
 Скам: {is_scam}
 Бот: {is_bot}
 Версия юзер бота: {version}
+Версия юзер бота на гитхаб: {github_version}
 <a href='https://github.com/purpl3-yt/pyuserbot'>Репозиторий</a>''',disable_web_page_preview=True)
 
     else:

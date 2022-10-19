@@ -21,7 +21,8 @@ app = Client('my_account',api_id=api_id, api_hash=api_hash)
 htext = Setting('htext','f')
 hideset = Setting('hide','f')
 autoreac = Setting('autoreac','f')
-settings_list = {'htext':htext,'hide':hideset,'autoreac':autoreac}
+ttsset = Setting('tts','f')
+settings_list = {'htext':htext,'hide':hideset,'autoreac':autoreac,'tts':ttsset}
 stop=False
 #System
 @app.on_message(filters.command('set', prefixes='.') & filters.me)
@@ -61,9 +62,9 @@ async def type(_, msg):
             try:
                 await msg.edit(i+'</b>')
             except FloodWait as wait:
-                sleep(wait)
+                await asyncio.sleep(0.05)
             tbp = i
-            sleep(0.03)
+            await asyncio.sleep(0.05)
         break
 
 @app.on_message(filters.command('hackerstr', prefixes='.') & filters.me)
@@ -108,7 +109,7 @@ async def tts(_, msg):
         else:
             await msg.delete()        
             tts.save('voice.mp3')
-            await app.send_voice(msg.chat.id,'voice.mp3',caption='Powered by <a href="https://github.com/purpl3-yt/pyuserbot">PyUserBot</a>')
+            await app.send_voice(msg.chat.id,'voice.mp3')
 
 
 @app.on_message(filters.command('hide', prefixes='.') & filters.me)
@@ -224,9 +225,10 @@ async def update(_,msg):
     await msg.edit('Обновление успешно завершено! перезапустите юзербота')
 
 #On messages
-@app.on_message(filters.all & ~ filters.private)
+@app.on_message(filters.all & filters.private & filters.me)
 async def write_self(_,msg):
     if msg.from_user!=None:
+        global htext,hideset,tts
         if msg.from_user.is_self == True:
             if str(htext.getstatus()).lower()=='t':
                     if str(msg.text).lower() == '.set htext f':htext.setstatus('t')
@@ -238,15 +240,24 @@ async def write_self(_,msg):
                                 tbp = i
                                 await asyncio.sleep(0.03)
                             break
-
             elif str(hideset.getstatus()).lower()=='t':
-                if str(msg.text).lower() == '.setting hide f':hideset.setstatus('t')
-                elif str(msg.text).lower() == '.setting hide t':hideset.setstatus('f')
+                if str(msg.text).lower() == '.set hide f':hideset.setstatus('t')
+                elif str(msg.text).lower() == '.set hide t':hideset.setstatus('f')
                 else:await msg.edit('||'+msg.text[4:]+'||')
+            elif str(ttsset.getstatus()).lower()=='t':
+                if str(msg.text).lower() == '.set tts f':ttsset.setstatus('t')
+                elif str(msg.text).lower() == '.set tts t':ttsset.setstatus('f')
+                else:
+                    from gtts import gTTS
+                    text = str(msg.text).split(' ')[0:]
+                    voicetts = gTTS(str(' '.join(text)),lang='ru')
+                    await msg.delete()        
+                    voicetts.save('voice.mp3')
+                    await app.send_voice(msg.chat.id,'voice.mp3')
         elif msg.from_user.is_self == False:
             if str(autoreac.getstatus()).lower()=='t':
-                if str(msg.text).lower() == '.setting autoreac f':autoreac.setstatus('t')
-                elif str(msg.text).lower() == '.setting autoreac t':autoreac.setstatus('f')
+                if str(msg.text).lower() == '.set autoreac f':autoreac.setstatus('t')
+                elif str(msg.text).lower() == '.set autoreac t':autoreac.setstatus('f')
                 else:
                     from random import choice
                     random_emoji = ['🔥','👍','💩']
