@@ -2,4 +2,4 @@ pyrogram
 download
 requests
 gtts
-textblob
+google
