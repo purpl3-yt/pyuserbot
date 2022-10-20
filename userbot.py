@@ -11,7 +11,7 @@ stoponline=False
 config = configparser.ConfigParser()
 if not path.isfile('./settings.ini'):
     newconfig = open('settings.ini', 'w')
-    newconfig.write('[main]\napi_id = 123123\napi_hash = abcdefg1234')
+    newconfig.write('[main]\napi_id = 123123\napi_hash = abcdefg1234\nhtext = f\nhideset = f\nautoreac = f\ntts = f')
     newconfig.close()
     print('Created new empty config, please check root dir')
     sys.exit()
@@ -20,10 +20,10 @@ api_id = config.get('main','api_id')
 api_hash = config.get('main','api_hash')
 app = Client('my_account',api_id=api_id, api_hash=api_hash)
 #Settings
-htext = Setting('htext','f')
-hideset = Setting('hide','f')
-autoreac = Setting('autoreac','f')
-ttsset = Setting('tts','f')
+htext = Setting('htext',config.get('main','htext'))
+hideset = Setting('hide',config.get('main','hideset'))
+autoreac = Setting('autoreac',config.get('main','autoreac'))
+ttsset = Setting('tts',config.get('main','tts'))
 settings_list = {'htext':htext,'hide':hideset,'autoreac':autoreac,'tts':ttsset}
 stop=False
 #System
@@ -32,8 +32,10 @@ async def set(_, msg):
     try:
         what = msg.text.split(' ')[1]
     except IndexError:
-        settings = [str(i) for i in settings_list.keys()]
-        await msg.edit(f'Все настройки: <code>{",".join(settings)}</code>')
+        settings = []
+        for i in settings_list.keys():
+            settings.append(settings_list.get(i).getname()+': '+settings_list.get(i).getstatus())
+        await msg.edit(f'Все настройки: <code>{", ".join(settings)}</code>')
         return None
     try:
         status = msg.text.split(' ')[2]
@@ -41,8 +43,11 @@ async def set(_, msg):
         await warn(app,msg,'Введите статус: (t,f) t - вкл f - выкл')
         return None
     try:
+        config.set('main',str(what),str(status))
+        config.write(open('settings.ini','w'))
         set = settings_list[what]
         set.setstatus(status)
+
     except KeyError:
         await warn(app,msg,'Такой настройки нету!')
     else:
@@ -162,10 +167,9 @@ async def math(_,msg):
 @app.on_message(filters.command('help', prefixes='.') & filters.me)
 async def help(_, msg):
     settings = [str(i[0])+' ' for i in settings_list.items()]
-    await msg.edit(f'''
-```
+    await msg.edit(f'''<code>
 Доступные команды:
-.setting (настройка) (статус) - меняет настройки
+.set (настройка) (статус) - меняет настройки
 Настройки: {' '.join(settings)}
 .profile - показывает профиль пользователя, если написать команду в ответ другому юзеру выведет его инфу
 .type (текст) - делает анимацию текста
@@ -184,7 +188,7 @@ async def help(_, msg):
 .online - Делает вас всегда в онлайне
 .offline - Останавливает команду .online
 .update - обновляет юзер бота
-.restart - перезапускает юзер бота```
+.restart - перезапускает юзер бота</code>
 ''')
 @app.on_message(filters.command('stop',prefixes='.') & filters.me)
 async def stop(_,msg):
@@ -223,12 +227,12 @@ async def offline(_,msg):
 
 @app.on_message(filters.command('update',prefixes='.') & filters.me)
 async def update(_,msg):
-    await msg.edit('Обновление юзер бота!')
+    await msg.edit('<code>Обновление юзер бота!</code>')
     check_version(True)
-    await msg.edit('Обновление успешно завершено! напишите команду .restart для перезагрузки')
+    await warn(app,msg,'Обновление успешно завершено! напишите команду .restart для перезагрузки')
 @app.on_message(filters.command('restart',prefixes='.') & filters.me)
 async def restart(_,msg):
-    await msg.edit('Перезагрузка юзер бота! подождите 5-10 секунд')
+    await warn(app,msg,'Перезагрузка юзер бота! подождите 5-10 секунд')
     execv(sys.executable, [sys.path[0],'main.py'])
     exit()
 

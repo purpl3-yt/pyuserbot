@@ -122,17 +122,16 @@ class Setting:
         return self.status
     def setstatus(self,newstatus):
         self.status = newstatus
-
 #For messages
-async def warn(app,msg,warn: str,alt = False):
+async def warn(app,msg,warn: str,alt = False,delay = 3):
     from asyncio import sleep
     if alt==False:
         await msg.edit('<code>'+str(warn)+'</code>')
-        await sleep(3)
+        await sleep(delay)
         await msg.delete()
     elif alt==False:
         warn_msg = await app.send_message(msg.chat.id,'<code>'+str(warn)+'</code>')
-        await sleep(3)
+        await sleep(delay)
         await warn_msg.delete()
 async def getprofile(msg):
     with open('version.txt') as f:
@@ -234,4 +233,4 @@ async def umath(msg,num1,oper,num2,app=None):
         elif oper=='/':await msg.edit(int(num1)/int(num2))
         elif oper=='*':await msg.edit(int(num1)*int(num2))
     except ValueError:
-        await warn(app,msg,'<code>Введите числа а не буквы</code>')
+        await warn(app,msg,'Введите числа а не буквы!')
