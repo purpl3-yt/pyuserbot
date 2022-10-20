@@ -153,7 +153,7 @@ async def math(_,msg):
     try:num1 = str(msg.text).split(' ')[1]
     except IndexError:await warn(app,msg,'Введите первое число!')
     try:operation = str(msg.text).split(' ')[2]
-    except IndexError:await warn(app,msg,'Введите операцию! [+,-,/]')
+    except IndexError:await warn(app,msg,'Введите операцию! [+,-,/,*]')
     try:num2 = str(msg.text).split(' ')[3]
     except IndexError:await warn(app,msg,'Введите второе число!')
     await umath(msg,num1,operation,num2)

@@ -232,5 +232,6 @@ async def umath(msg,num1,oper,num2,app=None):
         if oper=='+':await msg.edit(int(num1)+int(num2))
         elif oper=='-':await msg.edit(int(num1)-int(num2))
         elif oper=='/':await msg.edit(int(num1)/int(num2))
+        elif oper=='*':await msg.edit(int(num1)*int(num2))
     except ValueError:
-        await warn(app,msg,'Введите числа а не буквы и т.д')
+        await warn(app,msg,'<code>Введите числа а не буквы</code>')
