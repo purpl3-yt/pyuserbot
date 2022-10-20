@@ -1,5 +1,7 @@
 import asyncio
-import os
+from os import environ, execv, path
+import platform
+import sqlite3
 import sys
 from pyrogram import *
 from pyrogram import errors
@@ -7,7 +9,7 @@ from utils import *
 import configparser
 stoponline=False
 config = configparser.ConfigParser()
-if not os.path.isfile('./settings.ini'):
+if not path.isfile('./settings.ini'):
     newconfig = open('settings.ini', 'w')
     newconfig.write('[main]\napi_id = 123123\napi_hash = abcdefg1234')
     newconfig.close()
@@ -111,7 +113,6 @@ async def tts(_, msg):
             tts.save('voice.mp3')
             await app.send_voice(msg.chat.id,'voice.mp3')
 
-
 @app.on_message(filters.command('hide', prefixes='.') & filters.me)
 async def hide(_, msg):
     await msg.edit('||'+msg.text[4:]+'||')
@@ -174,14 +175,16 @@ async def help(_, msg):
 .spam (количество) (текст) - спамит сообщениями
 .tts (в какой язык [en,ru,etc]) (текст) - отправляет голосовое сообщение с текстом
 .rand (первое число) (второе число) - генерирует рандомное число
+.math (первое число) (оператор [+,-,/]) (второе число)
 .ghoul - считает 1000-7
 .rsky - делает разноцветное небо
 .stop - останавливает процесс, например когда ключена команда .ghoul
 .del -> Вы должны ответить на сообщение! - удаляет сообщение
 .getmsg -> Вы должны ответить на сообщение! - выводит данные сообщения в консоль
 .online - Делает вас всегда в онлайне
-.offline - Перестает быть в онлайне
-.update - обновляет юзер бота```
+.offline - Останавливает команду .online
+.update - обновляет юзер бота
+.restart - перезапускает юзер бота```
 ''')
 @app.on_message(filters.command('stop',prefixes='.') & filters.me)
 async def stop(_,msg):
@@ -193,7 +196,7 @@ async def delete(_,msg):
     if msg.from_user.is_self==True:
         await app.delete_messages(msg.chat.id,msg.reply_to_message_id)
         await msg.delete()
-    elif msg.from_user.is_selfz==False:
+    elif msg.from_user.is_self==False:
         await warn(app,msg,'Это не ваше сообщение!',False)
 @app.on_message(filters.command('getmsg',prefixes='.') & filters.me)
 async def getmsg(_,msg):
@@ -222,10 +225,15 @@ async def offline(_,msg):
 async def update(_,msg):
     await msg.edit('Обновление юзер бота!')
     check_version(True)
-    await msg.edit('Обновление успешно завершено! перезапустите юзербота')
+    await msg.edit('Обновление успешно завершено! напишите команду .restart для перезагрузки')
+@app.on_message(filters.command('restart',prefixes='.') & filters.me)
+async def restart(_,msg):
+    await msg.edit('Перезагрузка юзер бота! подождите 5-10 секунд')
+    execv(sys.executable, [sys.path[0],'main.py'])
+    exit()
 
 #On messages
-@app.on_message(filters.all & filters.private & filters.me)
+@app.on_message(filters.all | filters.me | filters.private)
 async def write_self(_,msg):
     if msg.from_user!=None:
         global htext,hideset,tts
@@ -248,12 +256,13 @@ async def write_self(_,msg):
                 if str(msg.text).lower() == '.set tts f':ttsset.setstatus('t')
                 elif str(msg.text).lower() == '.set tts t':ttsset.setstatus('f')
                 else:
-                    from gtts import gTTS
-                    text = str(msg.text).split(' ')[0:]
-                    voicetts = gTTS(str(' '.join(text)),lang='ru')
-                    await msg.delete()        
-                    voicetts.save('voice.mp3')
-                    await app.send_voice(msg.chat.id,'voice.mp3')
+                    if msg.text!=None:
+                        from gtts import gTTS
+                        text = str(msg.text).split(' ')[0:]
+                        voicetts = gTTS(str(' '.join(text)),lang='ru')
+                        await msg.delete()        
+                        voicetts.save('voice.mp3')
+                        await app.send_voice(msg.chat.id,'voice.mp3')
         elif msg.from_user.is_self == False:
             if str(autoreac.getstatus()).lower()=='t':
                 if str(msg.text).lower() == '.set autoreac f':autoreac.setstatus('t')
@@ -263,8 +272,14 @@ async def write_self(_,msg):
                     random_emoji = ['🔥','👍','💩']
                     await app.send_reaction(msg.chat.id, msg.id, choice(random_emoji))
 
-
 def run():#Run userbot
     print(getlogo(),end='')
-    app.run()
+    print(f'By: https://t.me/@PLNT_YT\nYour system is: {str(platform.system())}')
+    try:
+        app.run()
+    except sqlite3.OperationalError as e:
+        if str(platform.system()).lower() == 'linux':
+            print('\n\nYou have sqlite3 error!\nEnter: fuser my_account.session\nAnd check number at end\nAnd type: kill -9 <number in command fuser>\n\n')
+        elif str(platform.system()).lower() == 'windows':
+            print('\n\nYou have sqlite3 error!\nKill all python processes\n\n')
 run()

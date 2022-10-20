@@ -3,6 +3,7 @@ try:
     from download import download
     import requests
     import gtts
+    import sqlite3
 except ImportError:
     import os,shutil
     print('Wait, we install libraries')
@@ -17,7 +18,6 @@ except ImportError:
     os.system('pip install -r imports.txt')
 
 from utils import check_version
-
 check_version()
 from userbot import run
 run()#Run userbot
