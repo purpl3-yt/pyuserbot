@@ -2,6 +2,7 @@ import asyncio
 from os import environ, execv, path
 import platform
 import sqlite3
+import subprocess
 import sys
 from pyrogram import *
 from pyrogram import errors
@@ -33,8 +34,12 @@ except configparser.NoOptionError as e:
     option_end = int(str(option).find("' in section"))
     config.set('main',str(option[option_start:option_end]), 'f')
     config.write(open('settings.ini','w'))
-    execv(sys.executable, [sys.path[0],'main.py'])
-    exit()
+    if str(platform.system()).lower() == 'linux':
+        path_to_python = subprocess.Popen(['which','python3'],stdout=subprocess.PIPE).communicate()[0]
+        execv(str(path_to_python), [sys.path[0],'main.py'])
+    elif str(platform.system()).lower() == 'windows':
+        execv(sys.executable, [sys.path[0],'main.py'])
+        exit()
 stop=False
 #System
 @app.on_message(filters.command('set', prefixes='.') & filters.me)
@@ -248,7 +253,12 @@ async def update(_,msg):
 @app.on_message(filters.command('restart',prefixes='.') & filters.me)
 async def restart(_,msg):
     await warn(app,msg,'Перезагрузка юзер бота! подождите 5-10 секунд')
-    execv(sys.executable, [sys.path[0],'main.py'])
+    if str(platform.system()).lower() == 'linux':
+        path_to_python = subprocess.Popen(['which','python3'],stdout=subprocess.PIPE).communicate()[0]
+        execv(str(path_to_python), [sys.path[0],'main.py'])
+    elif str(platform.system()).lower() == 'windows':
+        execv(sys.executable, [sys.path[0],'main.py'])
+        exit()
     exit()
 
 #On messages
