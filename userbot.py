@@ -20,11 +20,19 @@ api_id = config.get('main','api_id')
 api_hash = config.get('main','api_hash')
 app = Client('my_account',api_id=api_id, api_hash=api_hash)
 #Settings
-htext = Setting('htext',config.get('main','htext'))
-hideset = Setting('hide',config.get('main','hideset'))
-autoreac = Setting('autoreac',config.get('main','autoreac'))
-ttsset = Setting('tts',config.get('main','tts'))
-settings_list = {'htext':htext,'hide':hideset,'autoreac':autoreac,'tts':ttsset}
+try:
+    htext = Setting('htext',config.get('main','htext'))
+    hideset = Setting('hide',config.get('main','hide'))
+    autoreac = Setting('autoreac',config.get('main','autoreac'))
+    ttsset = Setting('tts',config.get('main','tts'))
+    settings_list = {'htext':htext,'hide':hideset,'autoreac':autoreac,'tts':ttsset}
+except configparser.NoOptionError as e:
+    option = str(e)
+    option_start = int(str(option).find("No option '"))+len("No option '")
+    option_end = int(str(option).find("' in section"))
+    config.set('main',str(option[option_start:option_end]), 'f')
+    config.write(open('settings.ini','w'))
+    config.read('settings.ini')
 stop=False
 #System
 @app.on_message(filters.command('set', prefixes='.') & filters.me)
@@ -153,6 +161,10 @@ async def ghoul(_,msg):
 async def rsky(_,msg):
     await usky(msg)
 
+@app.on_message(filters.command('jac',prefixes='.') & filters.me)
+async def jac(_,msg):
+    await jac_img(app,msg)
+
 @app.on_message(filters.command('math', prefixes='.') & filters.me)
 async def math(_,msg):
     try:num1 = str(msg.text).split(' ')[1]
@@ -182,6 +194,7 @@ async def help(_, msg):
 .math (первое число) (оператор [+,-,/]) (второе число)
 .ghoul - считает 1000-7
 .rsky - делает разноцветное небо
+.jac (текст) - делает цитату жака фреско
 .stop - останавливает процесс, например когда ключена команда .ghoul
 .del -> Вы должны ответить на сообщение! - удаляет сообщение
 .getmsg -> Вы должны ответить на сообщение! - выводит данные сообщения в консоль

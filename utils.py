@@ -36,7 +36,7 @@ def check_version(force=False):
 
 def text_animation(text):
     from random import choice
-    symbols = ['!','@','#','$','%','^','&','*','(',')','{','}','[',']']
+    symbols = ['*','@','#','$','%','^','&','*','&']
     temp = text
     temp+=temp[:1]
     shif = []
@@ -122,7 +122,7 @@ class Setting:
         return self.status
     def setstatus(self,newstatus):
         self.status = newstatus
-#For messages
+#For msgs
 async def warn(app,msg,warn: str,alt = False,delay = 3):
     from asyncio import sleep
     if alt==False:
@@ -130,7 +130,7 @@ async def warn(app,msg,warn: str,alt = False,delay = 3):
         await sleep(delay)
         await msg.delete()
     elif alt==False:
-        warn_msg = await app.send_message(msg.chat.id,'<code>'+str(warn)+'</code>')
+        warn_msg = await app.send_msg(msg.chat.id,'<code>'+str(warn)+'</code>')
         await sleep(delay)
         await warn_msg.delete()
 async def getprofile(msg):
@@ -155,12 +155,12 @@ async def getprofile(msg):
 <a href='https://github.com/purpl3-yt/pyuserbot'>Репозиторий</a>''',disable_web_page_preview=True)
 
     else:
-        first_name = msg.reply_to_message.from_user.first_name
-        last_name = msg.reply_to_message.from_user.last_name
-        name = msg.reply_to_message.from_user.username
-        is_premium = msg.reply_to_message.from_user.is_premium
-        is_scam = msg.reply_to_message.from_user.is_scam
-        is_bot = msg.reply_to_message.from_user.is_bot
+        first_name = msg.reply_to_msg.from_user.first_name
+        last_name = msg.reply_to_msg.from_user.last_name
+        name = msg.reply_to_msg.from_user.username
+        is_premium = msg.reply_to_msg.from_user.is_premium
+        is_scam = msg.reply_to_msg.from_user.is_scam
+        is_bot = msg.reply_to_msg.from_user.is_bot
         await msg.edit(f'''
 Первое имя: {first_name}
 Второе имя: {last_name}
@@ -234,3 +234,34 @@ async def umath(msg,num1,oper,num2,app=None):
         elif oper=='*':await msg.edit(int(num1)*int(num2))
     except ValueError:
         await warn(app,msg,'Введите числа а не буквы!')
+    
+async def jac_img(app,msg):
+    from PIL import ImageDraw,Image,ImageFont
+    import requests
+    import io
+    ufr = requests.get("https://github.com/Sad0ff/modules-ftg/raw/master/open-sans.ttf")
+    f = ufr.content
+    pic = requests.get("https://www.meme-arsenal.com/memes/54c7ee322f4b0ae586ec96195a59a073.jpg")
+    pic.raw.decode_content = True
+    img = Image.open(io.BytesIO(pic.content)).convert("RGB")
+
+    W, H = img.size
+    #txt = txt.replace("\n", "𓃐")
+    text = "\n".join(str(msg.text).split(' ')[1:])
+    t = text + "\n"
+    #t = t.replace("𓃐","\n")
+    draw = ImageDraw.Draw(img)
+    font = ImageFont.truetype(io.BytesIO(f), 32, encoding='UTF-8')
+    w, h = draw.multiline_textsize(t, font=font)
+    imtext = Image.new("RGBA", (w+10, h+10), (0, 0,0,0))
+    draw = ImageDraw.Draw(imtext)
+    draw.multiline_text((10, 10),t,(0,0,0),font=font, align='left')
+    imtext.thumbnail((339, 181))
+    w, h = 339, 181
+    img.paste(imtext, (10,10), imtext)
+    out = io.BytesIO()
+    out.name = "shak.jpg"
+    img.save(out)
+    out.seek(0)
+    await app.send_photo(msg.chat.id,out)
+    await msg.delete()
