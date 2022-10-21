@@ -29,15 +29,17 @@ try:
     jacset = Setting('jac',config.get('main','jac'))
     settings_list = {'htext':htext,'hide':hideset,'autoreac':autoreac,'tts':ttsset,'jac':jacset}
 except configparser.NoOptionError as e:
+    import pathlib
     option = str(e)
     option_start = int(str(option).find("No option '"))+len("No option '")
     option_end = int(str(option).find("' in section"))
     config.set('main',str(option[option_start:option_end]), 'f')
     config.write(open('settings.ini','w'))
     if str(platform.system()).lower() == 'linux':
-        execv(str('python3'), [sys.path[0],'main.py'])
+        execv(str('python3'), [str(pathlib.Path(__file__).parent.resolve()),'main.py'])
+        exit()
     elif str(platform.system()).lower() == 'windows':
-        execv(sys.executable, [sys.path[0],'main.py'])
+        execv(sys.executable, [str(pathlib.Path(__file__).parent.resolve()),'main.py'])
         exit()
 stop=False
 #System
@@ -253,9 +255,9 @@ async def update(_,msg):
 async def restart(_,msg):
     await warn(app,msg,'Перезагрузка юзер бота! подождите 5-10 секунд')
     if str(platform.system()).lower() == 'linux':
-        execv(str('python3'), [sys.path[0],'main.py'])
+        execv(str('python3'), [str(pathlib.Path(__file__).parent.resolve()),'main.py'])
     elif str(platform.system()).lower() == 'windows':
-        execv(sys.executable, [sys.path[0],'main.py'])
+        execv(sys.executable, [str(pathlib.Path(__file__).parent.resolve()),'main.py'])
         exit()
     exit()
 
