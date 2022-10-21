@@ -3,8 +3,6 @@ try:
     from download import download
     import requests
     import gtts
-    import sqlite3
-    import PIL
 except ImportError:
     import os,shutil
     from download import download

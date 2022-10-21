@@ -3,4 +3,3 @@ download
 requests
 gtts
 sqlite3
-pillow

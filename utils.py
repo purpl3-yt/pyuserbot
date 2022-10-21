@@ -236,7 +236,7 @@ async def umath(msg,num1,oper,num2,app=None):
         await warn(app,msg,'Введите числа а не буквы!')
     
 async def jac_img(app,msg,setting=False):
-    from PIL import ImageDraw,Image,ImageFont
+    from PIL import ImageDraw,ImageFont,Image
     import requests
     import io
     ufr = requests.get('https://github.com/Sad0ff/modules-ftg/raw/master/open-sans.ttf')
