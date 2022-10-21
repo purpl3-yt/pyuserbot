@@ -6,7 +6,8 @@ try:
     import sqlite3
     import PIL
 except ImportError:
-    import os,shutil,download
+    import os,shutil
+    from download import download
     print('Wait, we install libraries')
     if not os.path.isdir('./newfiles'):
         os.mkdir('./newfiles')
