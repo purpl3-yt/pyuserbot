@@ -87,7 +87,7 @@ def getrandomip():
     import random
     import socket
     import struct
-    return socket.inet_ntoa(struct.pack(">I", random.randint(1, 0xffffffff)))
+    return socket.inet_ntoa(struct.pack('>I', random.randint(1, 0xffffffff)))
 
 def getrandomhwid():
     import string
@@ -235,32 +235,40 @@ async def umath(msg,num1,oper,num2,app=None):
     except ValueError:
         await warn(app,msg,'Введите числа а не буквы!')
     
-async def jac_img(app,msg):
+async def jac_img(app,msg,setting=False):
     from PIL import ImageDraw,Image,ImageFont
     import requests
     import io
-    ufr = requests.get("https://github.com/Sad0ff/modules-ftg/raw/master/open-sans.ttf")
+    ufr = requests.get('https://github.com/Sad0ff/modules-ftg/raw/master/open-sans.ttf')
     f = ufr.content
-    pic = requests.get("https://www.meme-arsenal.com/memes/54c7ee322f4b0ae586ec96195a59a073.jpg")
+    pic = requests.get('https://www.meme-arsenal.com/memes/54c7ee322f4b0ae586ec96195a59a073.jpg')
     pic.raw.decode_content = True
-    img = Image.open(io.BytesIO(pic.content)).convert("RGB")
+    img = Image.open(io.BytesIO(pic.content)).convert('RGB')
 
     W, H = img.size
-    #txt = txt.replace("\n", "𓃐")
-    text = "\n".join(str(msg.text).split(' ')[1:])
-    t = text + "\n"
-    #t = t.replace("𓃐","\n")
+    #txt = txt.replace('\n', '𓃐')
+    if setting==False:
+        if msg.reply_to_message!=None:
+            text = '\n'.join(str(msg.reply_to_message.text).split(' ')[0:])
+            t = text + '\n'
+        else:
+            text = '\n'.join(str(msg.text).split(' ')[1:])
+            t = text + '\n'
+    else:
+        text = '\n'.join(str(msg.text).split(' ')[0:])
+        t = text + '\n'
+    #t = t.replace('𓃐','\n')
     draw = ImageDraw.Draw(img)
     font = ImageFont.truetype(io.BytesIO(f), 32, encoding='UTF-8')
     w, h = draw.multiline_textsize(t, font=font)
-    imtext = Image.new("RGBA", (w+10, h+10), (0, 0,0,0))
+    imtext = Image.new('RGBA', (w+10, h+10), (0, 0,0,0))
     draw = ImageDraw.Draw(imtext)
     draw.multiline_text((10, 10),t,(0,0,0),font=font, align='left')
     imtext.thumbnail((339, 181))
     w, h = 339, 181
     img.paste(imtext, (10,10), imtext)
     out = io.BytesIO()
-    out.name = "shak.jpg"
+    out.name = 'shak.jpg'
     img.save(out)
     out.seek(0)
     await app.send_photo(msg.chat.id,out)

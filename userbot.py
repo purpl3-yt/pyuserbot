@@ -25,14 +25,16 @@ try:
     hideset = Setting('hide',config.get('main','hide'))
     autoreac = Setting('autoreac',config.get('main','autoreac'))
     ttsset = Setting('tts',config.get('main','tts'))
-    settings_list = {'htext':htext,'hide':hideset,'autoreac':autoreac,'tts':ttsset}
+    jacset = Setting('jac',config.get('main','jac'))
+    settings_list = {'htext':htext,'hide':hideset,'autoreac':autoreac,'tts':ttsset,'jac':jacset}
 except configparser.NoOptionError as e:
     option = str(e)
     option_start = int(str(option).find("No option '"))+len("No option '")
     option_end = int(str(option).find("' in section"))
     config.set('main',str(option[option_start:option_end]), 'f')
     config.write(open('settings.ini','w'))
-    config.read('settings.ini')
+    execv(sys.executable, [sys.path[0],'main.py'])
+    exit()
 stop=False
 #System
 @app.on_message(filters.command('set', prefixes='.') & filters.me)
@@ -280,6 +282,11 @@ async def write_self(_,msg):
                         await msg.delete()        
                         voicetts.save('voice.mp3')
                         await app.send_voice(msg.chat.id,'voice.mp3')
+            elif str(jacset.getstatus()).lower()=='t':
+                if str(msg.text).lower() == '.set jac f':jacset.setstatus('t')
+                elif str(msg.text).lower() == '.set jac t':jacset.setstatus('f')
+                else:
+                    await jac_img(app,msg,True)
         elif msg.from_user.is_self == False:
             if str(autoreac.getstatus()).lower()=='t':
                 if str(msg.text).lower() == '.set autoreac f':autoreac.setstatus('t')
@@ -288,7 +295,6 @@ async def write_self(_,msg):
                     from random import choice
                     random_emoji = ['🔥','👍','💩']
                     await app.send_reaction(msg.chat.id, msg.id, choice(random_emoji))
-
 def run():#Run userbot
     print(getlogo(),end='')
     print(f'By: https://t.me/@PLNT_YT\nYour system is: {str(platform.system())}')
