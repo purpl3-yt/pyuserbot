@@ -4,8 +4,9 @@ try:
     import requests
     import gtts
     import sqlite3
+    import PIL
 except ImportError:
-    import os,shutil
+    import os,shutil,download
     print('Wait, we install libraries')
     if not os.path.isdir('./newfiles'):
         os.mkdir('./newfiles')
