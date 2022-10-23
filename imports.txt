@@ -2,4 +2,3 @@ pyrogram
 download
 requests
 gtts
-sqlite3
