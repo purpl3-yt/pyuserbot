@@ -2,3 +2,5 @@ pyrogram
 download
 requests
 gtts
+sqlite3
+pathlib

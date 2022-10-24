@@ -2,7 +2,8 @@ try:
     import pyrogram
     from download import download
     import requests
-    import gtts
+    from gtts import gTTS
+    import pathlib
 except ImportError:
     import os,shutil
     from download import download

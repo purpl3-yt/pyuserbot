@@ -12,7 +12,7 @@ stoponline=False
 config = configparser.ConfigParser()
 if not path.isfile('./settings.ini'):
     newconfig = open('settings.ini', 'w')
-    newconfig.write('[main]\napi_id = 123123\napi_hash = abcdefg1234\nhtext = f\nhideset = f\nautoreac = f\ntts = f')
+    newconfig.write('[main]\napi_id = 123123\napi_hash = abcdefg1234\n')
     newconfig.close()
     print('Created new empty config, please check root dir')
     sys.exit()
@@ -35,6 +35,7 @@ except configparser.NoOptionError as e:
     option_end = int(str(option).find("' in section"))
     config.set('main',str(option[option_start:option_end]), 'f')
     config.write(open('settings.ini','w'))
+    print('Pls wait we are creating settings for the config file')
     if str(platform.system()).lower() == 'linux':
         execv(str('python3'), [str(pathlib.Path(__file__).parent.resolve()),'main.py'])
         exit()
@@ -268,43 +269,29 @@ async def write_self(_,msg):
         global htext,hideset,tts
         if msg.from_user.is_self == True:
             if str(htext.getstatus()).lower()=='t':
-                    if str(msg.text).lower() == '.set htext f':htext.setstatus('t')
-                    elif str(msg.text).lower() == '.set htext t':htext.setstatus('f')
-                    else:
-                        while True:
-                            for i in text_animation(msg.text):
-                                await msg.edit(i)
-                                tbp = i
-                                await asyncio.sleep(0.03)
-                            break
+                while True:
+                    for i in text_animation(msg.text):
+                        await msg.edit(i)
+                        tbp = i
+                        await asyncio.sleep(0.03)
+                    break
             elif str(hideset.getstatus()).lower()=='t':
-                if str(msg.text).lower() == '.set hide f':hideset.setstatus('t')
-                elif str(msg.text).lower() == '.set hide t':hideset.setstatus('f')
-                else:await msg.edit('||'+msg.text[4:]+'||')
+                await msg.edit('||'+msg.text[4:]+'||')
             elif str(ttsset.getstatus()).lower()=='t':
-                if str(msg.text).lower() == '.set tts f':ttsset.setstatus('t')
-                elif str(msg.text).lower() == '.set tts t':ttsset.setstatus('f')
-                else:
-                    if msg.text!=None:
-                        from gtts import gTTS
-                        text = str(msg.text).split(' ')[0:]
-                        voicetts = gTTS(str(' '.join(text)),lang='ru')
-                        await msg.delete()        
-                        voicetts.save('voice.mp3')
-                        await app.send_voice(msg.chat.id,'voice.mp3')
+                if msg.text!=None:
+                    from gtts import gTTS
+                    text = str(msg.text).split(' ')[0:]
+                    voicetts = gTTS(str(' '.join(text)),lang='ru')
+                    await msg.delete()        
+                    voicetts.save('voice.mp3')
+                    await app.send_voice(msg.chat.id,'voice.mp3')
             elif str(jacset.getstatus()).lower()=='t':
-                if str(msg.text).lower() == '.set jac f':jacset.setstatus('t')
-                elif str(msg.text).lower() == '.set jac t':jacset.setstatus('f')
-                else:
-                    await jac_img(app,msg,True)
+                await jac_img(app,msg,True)
         elif msg.from_user.is_self == False:
             if str(autoreac.getstatus()).lower()=='t':
-                if str(msg.text).lower() == '.set autoreac f':autoreac.setstatus('t')
-                elif str(msg.text).lower() == '.set autoreac t':autoreac.setstatus('f')
-                else:
-                    from random import choice
-                    random_emoji = ['🔥','👍','💩']
-                    await app.send_reaction(msg.chat.id, msg.id, choice(random_emoji))
+                from random import choice
+                random_emoji = ['🔥','👍','💩']
+                await app.send_reaction(msg.chat.id, msg.id, choice(random_emoji))
 def run():#Run userbot
     print(getlogo(),end='')
     print(f'By: https://t.me/@PLNT_YT\nYour system is: {str(platform.system())}')

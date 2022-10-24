@@ -257,6 +257,7 @@ async def jac_img(app,msg,setting=False):
     else:
         text = '\n'.join(str(msg.text).split(' ')[0:])
         t = text + '\n'
+    await msg.delete()
     #t = t.replace('𓃐','\n')
     draw = ImageDraw.Draw(img)
     font = ImageFont.truetype(io.BytesIO(f), 32, encoding='UTF-8')
@@ -272,4 +273,4 @@ async def jac_img(app,msg,setting=False):
     img.save(out)
     out.seek(0)
     await app.send_photo(msg.chat.id,out)
-    await msg.delete()
+
