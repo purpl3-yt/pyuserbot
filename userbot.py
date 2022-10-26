@@ -27,6 +27,7 @@ try:
     autoreac = Setting('autoreac',config.get('main','autoreac'))
     ttsset = Setting('tts',config.get('main','tts'))
     jacset = Setting('jac',config.get('main','jac'))
+    #Settings dict
     settings_list = {'htext':htext,'hide':hideset,'autoreac':autoreac,'tts':ttsset,'jac':jacset}
 except configparser.NoOptionError as e:
     import pathlib

@@ -1,7 +1,9 @@
 from pyrogram import *
 from pyrogram.errors import FloodWait
+import configparser
 stop=False
-
+config = configparser.ConfigParser()
+config.read(r'./settings.ini')
 def changestop(newstop):
     global stop
     stop = newstop
@@ -36,7 +38,7 @@ def check_version(force=False):
 
 def text_animation(text):
     from random import choice
-    symbols = ['*','@','#','$','%','^','&','*','&']
+    symbols = ['*','@','#','$','%','^','&','&']
     temp = text
     temp+=temp[:1]
     shif = []
@@ -155,12 +157,12 @@ async def getprofile(msg):
 <a href='https://github.com/purpl3-yt/pyuserbot'>Репозиторий</a>''',disable_web_page_preview=True)
 
     else:
-        first_name = msg.reply_to_msg.from_user.first_name
-        last_name = msg.reply_to_msg.from_user.last_name
-        name = msg.reply_to_msg.from_user.username
-        is_premium = msg.reply_to_msg.from_user.is_premium
-        is_scam = msg.reply_to_msg.from_user.is_scam
-        is_bot = msg.reply_to_msg.from_user.is_bot
+        first_name = msg.reply_to_message.from_user.first_name
+        last_name = msg.reply_to_message.from_user.last_name
+        name = msg.reply_to_message.from_user.username
+        is_premium = msg.reply_to_message.from_user.is_premium
+        is_scam = msg.reply_to_message.from_user.is_scam
+        is_bot = msg.reply_to_message.from_user.is_bot
         await msg.edit(f'''
 Первое имя: {first_name}
 Второе имя: {last_name}

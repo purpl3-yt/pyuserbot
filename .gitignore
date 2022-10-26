@@ -1,9 +1,7 @@
 settings.ini
 my_account.*
 .vscode/
-__pycache__
+__pycache__/
 test.py
 newfiles/
 voice.mp3
-restart_id.txt
-sqlite3.exe
