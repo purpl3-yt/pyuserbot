@@ -175,6 +175,12 @@ async def rsky(_,msg):
 async def jac(_,msg):
     await jac_img(app,msg)
 
+@app.on_message(filters.command('meme',prefixes='.') & filters.me)
+async def meme_command(_,msg):
+    try:mem = str(msg.text).split(' ')[1]
+    except IndexError:await warn(app,msg,','.join(umemes));return None
+    await meme(app,msg,mem)
+
 @app.on_message(filters.command('math', prefixes='.') & filters.me)
 async def math(_,msg):
     try:num1 = str(msg.text).split(' ')[1]
@@ -202,9 +208,10 @@ async def help(_, msg):
 .tts (в какой язык [en,ru,etc]) (текст) - отправляет голосовое сообщение с текстом
 .rand (первое число) (второе число) - генерирует рандомное число
 .math (первое число) (оператор [+,-,/]) (второе число)
-.ghoul - считает 1000-7
+.ghoul - считает 1000-1 #deadinside
 .rsky - делает разноцветное небо
 .jac (текст) - делает цитату жака фреско
+.meme (мем) - отправляет мем
 .stop - останавливает процесс, например когда ключена команда .ghoul
 .del -> Вы должны ответить на сообщение! - удаляет сообщение
 .getmsg -> Вы должны ответить на сообщение! - выводит данные сообщения в консоль

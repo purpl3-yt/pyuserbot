@@ -1,6 +1,16 @@
 from pyrogram import *
 from pyrogram.errors import FloodWait
+from download import download
+from asyncio import sleep
+from PIL import ImageDraw,ImageFont,Image
+import io
+import os,shutil
 import configparser
+import requests
+import math, random
+import string
+import socket
+import struct
 stop=False
 config = configparser.ConfigParser()
 config.read(r'./settings.ini')
@@ -9,8 +19,6 @@ def changestop(newstop):
     stop = newstop
 
 def update():
-    import os,shutil
-    from download import download
     files = ['userbot.py','version.txt','utils.py','main.py']
     if not os.path.isdir('./newfiles'):
         os.mkdir('./newfiles')
@@ -23,7 +31,6 @@ def update():
         os.rename('./newfiles.part',f'./{i}')
 
 def check_version(force=False):
-    import requests
     if force==False:
         newversion = requests.get('https://raw.githubusercontent.com/purpl3-yt/pyuserbot/master/version.txt')
         with open('version.txt') as f:
@@ -37,13 +44,12 @@ def check_version(force=False):
         update()
 
 def text_animation(text):
-    from random import choice
     symbols = ['*','@','#','$','%','^','&','&']
     temp = text
     temp+=temp[:1]
     shif = []
     for i in range(1,len(temp)+1):
-        shif.append(choice(symbols))
+        shif.append(random.choice(symbols))
     steps = []
     phrase = []
     for i in range(1,int(len(temp))+1):
@@ -59,15 +65,13 @@ def text_animation(text):
     return steps
 
 def generatehackerstr(lenght):
-    from random import choice
     symbols = ['!','@','#','$','%','^','&','*','(',')','{','}','[',']']
     hackerstr = ''
     for i in range(0,int(lenght)):
-        hackerstr+=choice(symbols)
+        hackerstr+=random.choice(symbols)
     return hackerstr
 
 def getrandomgeo():
-    import math, random
     pi = math.pi
     cf = 180.0 / pi 
 
@@ -86,14 +90,10 @@ def getrandomgeo():
     return (round(cf*radLat, 5), round(cf*radLon, 5))
 
 def getrandomip():
-    import random
-    import socket
-    import struct
     return socket.inet_ntoa(struct.pack('>I', random.randint(1, 0xffffffff)))
 
 def getrandomhwid():
-    import string
-    import random
+
     random_ascii = string.ascii_uppercase
     random_digits = string.digits
     hwid = ''
@@ -102,7 +102,6 @@ def getrandomhwid():
         hwid+=random.choice(random_digits)
     return hwid
 def getlogo():
-    from time import sleep
     header = '''
   _    _               ____        _   
  | |  | |             |  _ \      | |  
@@ -126,7 +125,6 @@ class Setting:
         self.status = newstatus
 #For msgs
 async def warn(app,msg,warn: str,alt = False,delay = 3):
-    from asyncio import sleep
     if alt==False:
         await msg.edit('<code>'+str(warn)+'</code>')
         await sleep(delay)
@@ -138,7 +136,6 @@ async def warn(app,msg,warn: str,alt = False,delay = 3):
 async def getprofile(msg):
     with open('version.txt') as f:
         version = f.read()
-    import requests
     git_ver = requests.get('https://raw.githubusercontent.com/purpl3-yt/pyuserbot/master/version.txt')
     github_version = git_ver.text
     if msg.reply_to_message==None:
@@ -172,7 +169,6 @@ async def getprofile(msg):
 Скам: {is_scam}
 Бот: {is_bot}''')
 async def disappear(msg,str: str,step: int):#For anim
-    from time import sleep
     steps = []
     for i in range(0,len(str)+1,step):
         steps.append(str[:i])
@@ -193,7 +189,6 @@ async def ghoul_anim(msg):
             continue
         gh_list.append(f'{str(i)} - 7 = {str(i-7)}')
     gh_list.reverse()
-    from time import sleep
     for i in gh_list:
         if stop==True:
             await msg.delete()
@@ -207,13 +202,11 @@ async def ghoul_anim(msg):
 
 async def usky(msg):
     global stop
-    from random import choice
-    from time import sleep
     squares = ['🟥','🟧','🟨','🟩','🟦','🟪']
     def generateline():
         anim = []
         for i in range(0,17):
-            anim.append(choice(squares))
+            anim.append(random.choice(squares))
         return anim
     for i in range(0,9):#symbols lenght
         if stop==True:
@@ -238,9 +231,6 @@ async def umath(msg,num1,oper,num2,app=None):
         await warn(app,msg,'Введите числа а не буквы!')
     
 async def jac_img(app,msg,setting=False):
-    from PIL import ImageDraw,ImageFont,Image
-    import requests
-    import io
     ufr = requests.get('https://github.com/Sad0ff/modules-ftg/raw/master/open-sans.ttf')
     f = ufr.content
     pic = requests.get('https://www.meme-arsenal.com/memes/54c7ee322f4b0ae586ec96195a59a073.jpg')
@@ -275,4 +265,27 @@ async def jac_img(app,msg,setting=False):
     img.save(out)
     out.seek(0)
     await app.send_photo(msg.chat.id,out)
+umemes = ['uno','jac','like','salt','vojac']
+async def meme(app: Client,msg,meme):
+    if meme == 'uno':#карточки реверса
+        uno_cards_urls = ['CAACAgQAAxkBAAL2wWNZDQ9KquGC7PDmBeJz8zNUIZFAAAIFAAPVcf0xIvIu5opGXfMeBA','CAACAgQAAxkBAAL2w2NZDWTAis0LomAb4mndQmK5ZXb5AAIEAAPVcf0xXSRFIA9A-v4eBA','CAACAgQAAxkBAAL2xGNZDWSiIjvV-G3ItXZBB4TvBUzZAAIDAAPVcf0xtgnebiE3rAEeBA','CAACAgQAAxkBAAL2xWNZDWQuQdQsB3PkdZCsLb3hqHanAAICAAPVcf0x1qyFAAFPPAsOHgQ']
+        random_card = random.choice(uno_cards_urls)
+        await app.send_sticker(msg.chat.id, random_card)
+        await msg.delete()
+    elif meme == 'jac':#жак фреско, ладно
+        await msg.delete()
+        await app.send_photo(msg.chat.id,'AgACAgIAAxkDAAL3DGNZERcShm3TyyVt_arfHSnkRazxAAKpwTEbrfDISnaL3mzMrncMAAgBAAMCAAN5AAceBA')
+    elif meme == 'like':#лайк
+        likes_urls = ['CAACAgIAAxkBAAL2_WNZDrV6Zgc4pmMJTdoJC-8gPXEdAAKPGAACh-4hSbfyhIqPrJeUHgQ','CAACAgIAAxkBAAL2_mNZDrvyu-25Jm3VDERwXQthLuyRAAI0AAOROZwcpUsVS-iiqS8eBA','CAACAgIAAxkBAAL2_2NZDsAVNuxVGO04RkxlhZvbyaF5AAL5CQACxS2wSto5T6rLkb92HgQ']
+        random_like = random.choice(likes_urls)
+        await app.send_sticker(msg.chat.id,random_like)
+        await msg.delete()
+    elif meme == 'salt':#соль
+        await msg.delete()
+        await app.send_sticker(msg.chat.id,'CAACAgIAAxkBAAL3S2NZEhHTWI96BhcvSvVB48TB9jvfAAIOGAACaJzQS2XR7x4eNashHgQ')
+    elif meme == 'vojak':
+        vojac_urls = ['CAACAgQAAxkBAAL3T2NZEiOODzyS00sTBJA1gidAwt_eAAIFAQAC5JMqMIzUKlEXfKTPHgQ','CAACAgQAAxkBAAL3TGNZEhd-fYe2PuXs0ySabFhtxrNtAAIEAQAC5JMqMBtErOcuQV9AHgQ']
+        random_vojak = random.choice(vojac_urls)
+        await app.send_sticker(msg.chat.id,random_vojak)
+        await msg.delete()
 
