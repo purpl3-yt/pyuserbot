@@ -265,7 +265,7 @@ async def jac_img(app,msg,setting=False):
     img.save(out)
     out.seek(0)
     await app.send_photo(msg.chat.id,out)
-umemes = ['uno','jac','like','salt','vojac']
+umemes = ['uno','jac','like','salt','vojac','quepro']
 async def meme(app: Client,msg,meme):
     if meme == 'uno':#карточки реверса
         uno_cards_urls = ['CAACAgQAAxkBAAL2wWNZDQ9KquGC7PDmBeJz8zNUIZFAAAIFAAPVcf0xIvIu5opGXfMeBA','CAACAgQAAxkBAAL2w2NZDWTAis0LomAb4mndQmK5ZXb5AAIEAAPVcf0xXSRFIA9A-v4eBA','CAACAgQAAxkBAAL2xGNZDWSiIjvV-G3ItXZBB4TvBUzZAAIDAAPVcf0xtgnebiE3rAEeBA','CAACAgQAAxkBAAL2xWNZDWQuQdQsB3PkdZCsLb3hqHanAAICAAPVcf0x1qyFAAFPPAsOHgQ']
@@ -276,7 +276,7 @@ async def meme(app: Client,msg,meme):
         await msg.delete()
         await app.send_photo(msg.chat.id,'AgACAgIAAxkDAAL3DGNZERcShm3TyyVt_arfHSnkRazxAAKpwTEbrfDISnaL3mzMrncMAAgBAAMCAAN5AAceBA')
     elif meme == 'like':#лайк
-        likes_urls = ['CAACAgIAAxkBAAL2_WNZDrV6Zgc4pmMJTdoJC-8gPXEdAAKPGAACh-4hSbfyhIqPrJeUHgQ','CAACAgIAAxkBAAL2_mNZDrvyu-25Jm3VDERwXQthLuyRAAI0AAOROZwcpUsVS-iiqS8eBA','CAACAgIAAxkBAAL2_2NZDsAVNuxVGO04RkxlhZvbyaF5AAL5CQACxS2wSto5T6rLkb92HgQ']
+        likes_urls = ['CAACAgIAAxkBAAL2_WNZDrV6Zgc4pmMJTdoJC-8gPXEdAAKPGAACh-4hSbfyhIqPrJeUHgQ','CAACAgIAAxkBAAL2_mNZDrvyu-25Jm3VDERwXQthLuyRAAI0AAOROZwcpUsVS-iiqS8eBA']
         random_like = random.choice(likes_urls)
         await app.send_sticker(msg.chat.id,random_like)
         await msg.delete()
@@ -288,4 +288,8 @@ async def meme(app: Client,msg,meme):
         random_vojak = random.choice(vojac_urls)
         await app.send_sticker(msg.chat.id,random_vojak)
         await msg.delete()
+    elif meme == 'quepro':
+        await msg.delete()
+        await app.send_photo(msg.chat.id,'AgACAgIAAxkBAAL5HWNa1X4Vljqkvvm-V3ojXk6wuCEwAAJFxTEbRO_ZSvI-AbQR1VgDAAgBAAMCAAN5AAceBA')
+        
 
