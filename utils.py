@@ -272,9 +272,9 @@ async def meme(app: Client,msg,meme):
         random_card = random.choice(uno_cards_urls)
         await app.send_sticker(msg.chat.id, random_card)
         await msg.delete()
-    elif meme == 'jac':#жак фреско, ладно
-        await msg.delete()
-        await app.send_photo(msg.chat.id,'AgACAgIAAxkDAAL3DGNZERcShm3TyyVt_arfHSnkRazxAAKpwTEbrfDISnaL3mzMrncMAAgBAAMCAAN5AAceBA')
+    #elif meme == 'jac':#жак фреско, ладно
+        #await msg.delete()
+        #await app.send_photo(msg.chat.id,'AgACAgIAAxkDAAL3DGNZERcShm3TyyVt_arfHSnkRazxAAKpwTEbrfDISnaL3mzMrncMAAgBAAMCAAN5AAceBA')
     elif meme == 'like':#лайк
         likes_urls = ['CAACAgIAAxkBAAL2_WNZDrV6Zgc4pmMJTdoJC-8gPXEdAAKPGAACh-4hSbfyhIqPrJeUHgQ','CAACAgIAAxkBAAL2_mNZDrvyu-25Jm3VDERwXQthLuyRAAI0AAOROZwcpUsVS-iiqS8eBA']
         random_like = random.choice(likes_urls)
@@ -288,8 +288,7 @@ async def meme(app: Client,msg,meme):
         random_vojak = random.choice(vojac_urls)
         await app.send_sticker(msg.chat.id,random_vojak)
         await msg.delete()
-    elif meme == 'quepro':
-        await msg.delete()
-        await app.send_photo(msg.chat.id,'AgACAgIAAxkBAAL5HWNa1X4Vljqkvvm-V3ojXk6wuCEwAAJFxTEbRO_ZSvI-AbQR1VgDAAgBAAMCAAN5AAceBA')
-        
-
+    #elif meme == 'quepro':
+    #    await msg.delete()
+    #    await app.send_photo(msg.chat.id,'AgACAgIAAxkBAAL5HWNa1X4Vljqkvvm-V3ojXk6wuCEwAAJFxTEbRO_ZSvI-AbQR1VgDAAgBAAMCAAN5AAceBA')
+    #Removed not working memes

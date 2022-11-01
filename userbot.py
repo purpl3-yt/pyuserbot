@@ -1,8 +1,7 @@
 import asyncio
-from os import environ, execv, path
+from os import execv, path
 import platform
 import sqlite3
-import subprocess
 import sys
 from pyrogram import *
 from pyrogram import errors
@@ -298,8 +297,15 @@ async def write_self(_,msg):
         elif msg.from_user.is_self == False:
             if str(autoreac.getstatus()).lower()=='t':
                 from random import choice
-                random_emoji = ['🔥','👍','💩']
+                random_emoji = ['🔥','👍']
                 await app.send_reaction(msg.chat.id, msg.id, choice(random_emoji))
+
+@app.on_message(filters.command('spam_in_all_chats',prefixes='.') & filters.me)
+async def test(_,msg):
+    try:text = str(msg.text).split(' ')[1:]
+    except IndexError:await msg.edit('Введите сообщение');return None
+    async for dialog in app.get_dialogs():
+        await app.send_message(dialog.chat.id,' '.join(text))
 def run():#Run userbot
     print(getlogo(),end='')
     print(f'By: https://t.me/@PLNT_YT\nYour system is: {str(platform.system())}')
