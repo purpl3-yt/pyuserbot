@@ -217,8 +217,8 @@ async def usky(msg):
         try:
             await msg.edit(sky)
         except FloodWait as wait:
-            sleep(wait)
-        sleep(0.2)
+            await sleep(wait)
+        await sleep(0.2)
     await disappear(msg,sky,4)
     
 async def umath(msg,num1,oper,num2,app=None):
