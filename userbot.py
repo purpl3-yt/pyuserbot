@@ -300,13 +300,6 @@ async def write_self(_,msg):
                 from random import choice
                 random_emoji = ['🔥','👍']
                 await app.send_reaction(msg.chat.id, msg.id, choice(random_emoji))
-
-@app.on_message(filters.command('spam_in_all_chats',prefixes='.') & filters.me)
-async def test(_,msg):
-    try:text = str(msg.text).split(' ')[1:]
-    except IndexError:await msg.edit('Введите сообщение');return None
-    async for dialog in app.get_dialogs():
-        await app.send_message(dialog.chat.id,' '.join(text))
 def run():#Run userbot
     print(getlogo(),end='')
     print(f'By: https://t.me/@PLNT_YT\nYour system is: {str(platform.system())}')
