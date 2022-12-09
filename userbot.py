@@ -316,7 +316,7 @@ def run():#Run userbot
         app.run()
     except sqlite3.OperationalError as e:
         if str(platform.system()).lower() == 'linux':
-            print('\n\nYou have sqlite3 error!\nEnter: fuser my_account.session\nAnd check number at end\nAnd type: kill -9 <number in command fuser>\n\n')
+            print('\n\nYou have sqlite3 error!\nEnter: "fuser my_account.session"\nAnd check number at end\nAnd type: "kill -9 <number in command fuser>"\n\n')
         elif str(platform.system()).lower() == 'windows':
-            print('\n\nYou have sqlite3 error!\nKill all python processes\n\n')
+            print('\n\nYou have sqlite3 error!\nOpen cmd and enter: taskkill /F /IM python.exe\n\n')
 run()
