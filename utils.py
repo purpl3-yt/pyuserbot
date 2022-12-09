@@ -265,30 +265,31 @@ async def jac_img(app,msg,setting=False):
     img.save(out)
     out.seek(0)
     await app.send_photo(msg.chat.id,out)
-umemes = ['uno','jac','like','salt','vojac','quepro']
+umemes = ['uno','like','salt','vojac','femboy']
 async def meme(app: Client,msg,meme):
     if meme == 'uno':#карточки реверса
         uno_cards_urls = ['CAACAgQAAxkBAAL2wWNZDQ9KquGC7PDmBeJz8zNUIZFAAAIFAAPVcf0xIvIu5opGXfMeBA','CAACAgQAAxkBAAL2w2NZDWTAis0LomAb4mndQmK5ZXb5AAIEAAPVcf0xXSRFIA9A-v4eBA','CAACAgQAAxkBAAL2xGNZDWSiIjvV-G3ItXZBB4TvBUzZAAIDAAPVcf0xtgnebiE3rAEeBA','CAACAgQAAxkBAAL2xWNZDWQuQdQsB3PkdZCsLb3hqHanAAICAAPVcf0x1qyFAAFPPAsOHgQ']
         random_card = random.choice(uno_cards_urls)
         await app.send_sticker(msg.chat.id, random_card)
         await msg.delete()
-    #elif meme == 'jac':#жак фреско, ладно
-        #await msg.delete()
-        #await app.send_photo(msg.chat.id,'AgACAgIAAxkDAAL3DGNZERcShm3TyyVt_arfHSnkRazxAAKpwTEbrfDISnaL3mzMrncMAAgBAAMCAAN5AAceBA')
+    
     elif meme == 'like':#лайк
         likes_urls = ['CAACAgIAAxkBAAL2_WNZDrV6Zgc4pmMJTdoJC-8gPXEdAAKPGAACh-4hSbfyhIqPrJeUHgQ','CAACAgIAAxkBAAL2_mNZDrvyu-25Jm3VDERwXQthLuyRAAI0AAOROZwcpUsVS-iiqS8eBA']
         random_like = random.choice(likes_urls)
         await app.send_sticker(msg.chat.id,random_like)
         await msg.delete()
+    
     elif meme == 'salt':#соль
         await msg.delete()
         await app.send_sticker(msg.chat.id,'CAACAgIAAxkBAAL3S2NZEhHTWI96BhcvSvVB48TB9jvfAAIOGAACaJzQS2XR7x4eNashHgQ')
+    
     elif meme == 'vojak':
         vojac_urls = ['CAACAgQAAxkBAAL3T2NZEiOODzyS00sTBJA1gidAwt_eAAIFAQAC5JMqMIzUKlEXfKTPHgQ','CAACAgQAAxkBAAL3TGNZEhd-fYe2PuXs0ySabFhtxrNtAAIEAQAC5JMqMBtErOcuQV9AHgQ']
         random_vojak = random.choice(vojac_urls)
         await app.send_sticker(msg.chat.id,random_vojak)
         await msg.delete()
-    #elif meme == 'quepro':
-    #    await msg.delete()
-    #    await app.send_photo(msg.chat.id,'AgACAgIAAxkBAAL5HWNa1X4Vljqkvvm-V3ojXk6wuCEwAAJFxTEbRO_ZSvI-AbQR1VgDAAgBAAMCAAN5AAceBA')
+    
+    elif meme == 'femboy':
+        await app.send_sticker(msg.chat.id,'CAACAgIAAxkDAAEBnv1jk3S0p1-Gb8eeCdI66kmqyhps8AACHyIAAj3TiUjy-U0IEBjqWR4E')
+    
     #Removed not working memes
