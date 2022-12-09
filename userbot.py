@@ -215,6 +215,7 @@ async def help(_, msg):
 .stop - останавливает процесс, например когда ключена команда .ghoul
 .del -> Вы должны ответить на сообщение! - удаляет сообщение
 .getmsg -> Вы должны ответить на сообщение! - выводит данные сообщения в консоль
+.ню -> Вы должны ответить на сообщение! - пересылает сообщение в облако
 .online - Делает вас всегда в онлайне
 .offline - Останавливает команду .online
 .update - обновляет юзер бота
@@ -260,6 +261,7 @@ async def update(_,msg):
     await msg.edit('<code>Обновление юзер бота!</code>')
     check_version(True)
     await warn(app,msg,'Обновление успешно завершено! напишите команду .restart для перезагрузки')
+
 @app.on_message(filters.command('restart',prefixes='.') & filters.me)
 async def restart(_,msg):
     await warn(app,msg,'Перезагрузка юзер бота! подождите 5-10 секунд')
@@ -270,6 +272,13 @@ async def restart(_,msg):
         exit()
     exit()
 
+@app.on_message(filters.command('ню',prefixes='.') & filters.me)
+async def ny(_,msg):
+    try:
+        await app.delete_messages(msg.chat.id,msg.id)
+        await app.forward_messages('me',msg.chat.id,msg.reply_to_message.id)
+    except AttributeError:
+        await app.delete_messages(msg.chat.id,msg.id)
 #On messages
 @app.on_message(filters.all | filters.me | filters.private)
 async def write_self(_,msg):
