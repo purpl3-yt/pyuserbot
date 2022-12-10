@@ -177,7 +177,7 @@ async def disappear(msg,str: str,step: int):#For anim
         if i=='':
             break
         await msg.edit(i)
-        sleep(0.1)
+        await sleep(0.1)
     await msg.delete()
 
 async def ghoul_anim(msg):
@@ -185,9 +185,9 @@ async def ghoul_anim(msg):
     gh = 1000
     gh_list = []
     for i in range(0,gh+1):
-        if str(i-7)[:1]=='-':
+        if str(i-1)[:1]=='-':
             continue
-        gh_list.append(f'{str(i)} - 7 = {str(i-7)}')
+        gh_list.append(f'{str(i)} - 1 = {str(i-1)}')
     gh_list.reverse()
     for i in gh_list:
         if stop==True:

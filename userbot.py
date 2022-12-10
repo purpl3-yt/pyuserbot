@@ -1,5 +1,5 @@
 import asyncio
-from os import execv, path
+from os import execl, path
 import platform
 import sqlite3
 import sys
@@ -7,6 +7,9 @@ from pyrogram import *
 from pyrogram import errors
 from utils import *
 import configparser
+
+os.chdir(sys.path[0])
+
 stoponline=False
 config = configparser.ConfigParser()
 if not path.isfile('./settings.ini'):
@@ -37,10 +40,10 @@ except configparser.NoOptionError as e:
     config.write(open('settings.ini','w'))
     print('Pls wait we are creating settings for the config file')
     if str(platform.system()).lower() == 'linux':
-        execv(str('python3'), [str(Path(__file__).parent.resolve()),'main.py'])
+        execl(sys.executable, 'python', __file__, *sys.argv[1:])
         exit()
     elif str(platform.system()).lower() == 'windows':
-        execv(sys.executable, [str(Path(__file__).parent.resolve()),'main.py'])
+        execl(sys.executable, 'python', __file__, *sys.argv[1:])
         exit()
 stop=False
 #System
@@ -266,10 +269,9 @@ async def update(_,msg):
 async def restart(_,msg):
     await warn(app,msg,'Перезагрузка юзер бота! подождите 5-10 секунд')
     if str(platform.system()).lower() == 'linux':
-        execv(str('python3'), [str(Path(__file__).parent.resolve()),'main.py'])
+        execl(sys.executable, 'python', __file__, *sys.argv[1:])
     elif str(platform.system()).lower() == 'windows':
-        execv(sys.executable, [str(Path(__file__).parent.resolve()),'main.py'])
-        exit()
+        execl(sys.executable, 'python', __file__, *sys.argv[1:])
     exit()
 
 @app.on_message(filters.command('ню',prefixes='.') & filters.me)
@@ -311,7 +313,7 @@ async def write_self(_,msg):
                 await app.send_reaction(msg.chat.id, msg.id, choice(random_emoji))
 def run():#Run userbot
     print(getlogo(),end='')
-    print(f'By: https://t.me/@PLNT_YT\nYour system is: {str(platform.system())}')
+    print(f'By: https://t.me/PLNT_YT\nYour system is: {str(platform.system())}')
     try:
         app.run()
     except sqlite3.OperationalError as e:
