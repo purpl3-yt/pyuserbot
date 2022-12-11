@@ -29,8 +29,9 @@ try:
     autoreac = Setting('autoreac',config.get('main','autoreac'))
     ttsset = Setting('tts',config.get('main','tts'))
     jacset = Setting('jac',config.get('main','jac'))
+    olegset = Setting('oleg',config.get('main','oleg'))
     #Settings dict
-    settings_list = {'htext':htext,'hide':hideset,'autoreac':autoreac,'tts':ttsset,'jac':jacset}
+    settings_list = {'htext':htext,'hide':hideset,'autoreac':autoreac,'tts':ttsset,'jac':jacset,'oleg':olegset}
 except configparser.NoOptionError as e:
     from pathlib import Path
     option = str(e)
@@ -38,7 +39,7 @@ except configparser.NoOptionError as e:
     option_end = int(str(option).find("' in section"))
     config.set('main',str(option[option_start:option_end]), 'f')
     config.write(open('settings.ini','w'))
-    print('Pls wait we are creating settings for the config file')
+    print('Please wait we are creating settings for the config file')
     if str(platform.system()).lower() == 'linux':
         execl(sys.executable, 'python', __file__, *sys.argv[1:])
         exit()
@@ -63,6 +64,9 @@ async def set(_, msg):
         await warn(app,msg,'Введите статус: (t,f) t - вкл f - выкл')
         return None
     try:
+        if not status in ['t','f']:
+            await warn(app,msg,'Введите статус: (t,f) t - вкл f - выкл')
+            return None
         config.set('main',str(what),str(status))
         config.write(open('settings.ini','w'))
         set = settings_list[what]
@@ -182,10 +186,16 @@ async def meme_command(_,msg):
     try:mem = str(msg.text).split(' ')[1]
     except IndexError:await warn(app,msg,','.join(umemes));return None
     await meme(app,msg,mem)
+    await msg.delete()
+
+@app.on_message(filters.command('олег', prefixes='.') & filters.all)
+async def oleg(_,msg):
+    if olegset.getstatus() == 't':
+        await meme(app,msg,'oleg')
 
 @app.on_message(filters.command('math', prefixes='.') & filters.me)
 async def math(_,msg):
-    try:num1 = str(msg.text).split(' ')[1]
+    try:num1 = str(msg.texxt).split(' ')[1]
     except IndexError:await warn(app,msg,'Введите первое число!')
     try:operation = str(msg.text).split(' ')[2]
     except IndexError:await warn(app,msg,'Введите операцию! [+,-,/,*]')
@@ -215,6 +225,7 @@ async def help(_, msg):
 .rsky - делает разноцветное небо
 .jac (текст) - делает цитату жака фреско
 .meme (мем) - отправляет мем
+.олег - отправляет олега
 .stop - останавливает процесс, например когда ключена команда .ghoul
 .del -> Вы должны ответить на сообщение! - удаляет сообщение
 .getmsg -> Вы должны ответить на сообщение! - выводит данные сообщения в консоль

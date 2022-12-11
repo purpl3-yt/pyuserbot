@@ -265,7 +265,7 @@ async def jac_img(app,msg,setting=False):
     img.save(out)
     out.seek(0)
     await app.send_photo(msg.chat.id,out)
-umemes = ['uno','like','salt','vojac','femboy']
+umemes = ['uno','like','salt','vojac','femboy','oleg']
 async def meme(app: Client,msg,meme):
     if meme == 'uno':#карточки реверса
         uno_cards_urls = ['CAACAgQAAxkBAAL2wWNZDQ9KquGC7PDmBeJz8zNUIZFAAAIFAAPVcf0xIvIu5opGXfMeBA','CAACAgQAAxkBAAL2w2NZDWTAis0LomAb4mndQmK5ZXb5AAIEAAPVcf0xXSRFIA9A-v4eBA','CAACAgQAAxkBAAL2xGNZDWSiIjvV-G3ItXZBB4TvBUzZAAIDAAPVcf0xtgnebiE3rAEeBA','CAACAgQAAxkBAAL2xWNZDWQuQdQsB3PkdZCsLb3hqHanAAICAAPVcf0x1qyFAAFPPAsOHgQ']
@@ -291,5 +291,8 @@ async def meme(app: Client,msg,meme):
     
     elif meme == 'femboy':
         await app.send_sticker(msg.chat.id,'CAACAgIAAxkDAAEBnv1jk3S0p1-Gb8eeCdI66kmqyhps8AACHyIAAj3TiUjy-U0IEBjqWR4E')
-    
+
+    elif meme == 'oleg':
+        await app.send_sticker(msg.chat.id,'CAACAgIAAx0CZwXFtAABAbNtY5SIosrOCxj9HQIoidO27ydBZocAAhEVAAJLhgABSJ6bJubgLqHXHgQ')
+
     #Removed not working memes
