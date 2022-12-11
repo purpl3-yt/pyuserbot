@@ -168,6 +168,7 @@ async def getprofile(msg):
 С премиумом: {is_premium}
 Скам: {is_scam}
 Бот: {is_bot}''')
+
 async def disappear(msg,str: str,step: int):#For anim
     steps = []
     for i in range(0,len(str)+1,step):

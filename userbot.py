@@ -195,7 +195,7 @@ async def oleg(_,msg):
 
 @app.on_message(filters.command('math', prefixes='.') & filters.me)
 async def math(_,msg):
-    try:num1 = str(msg.texxt).split(' ')[1]
+    try:num1 = str(msg.text).split(' ')[1]
     except IndexError:await warn(app,msg,'Введите первое число!')
     try:operation = str(msg.text).split(' ')[2]
     except IndexError:await warn(app,msg,'Введите операцию! [+,-,/,*]')
@@ -230,6 +230,8 @@ async def help(_, msg):
 .del -> Вы должны ответить на сообщение! - удаляет сообщение
 .getmsg -> Вы должны ответить на сообщение! - выводит данные сообщения в консоль
 .ню -> Вы должны ответить на сообщение! - пересылает сообщение в облако
+.python (eval expression) - выполняет код пайтона
+.read - читает все сообщения
 .online - Делает вас всегда в онлайне
 .offline - Останавливает команду .online
 .update - обновляет юзер бота
@@ -239,6 +241,13 @@ async def help(_, msg):
 async def stop(_,msg):
     changestop(True)
     await msg.delete()
+
+@app.on_message(filters.command('python',prefixes='.') & filters.me)
+async def python(_,msg):
+    run = str(msg.text).split(' ')[1:]
+    eval_output = eval(' '.join(run))
+
+    await msg.edit(eval_output)
 
 @app.on_message(filters.command('del',prefixes='.') & filters.me)
 async def delete(_,msg):
@@ -292,6 +301,14 @@ async def ny(_,msg):
         await app.forward_messages('me',msg.chat.id,msg.reply_to_message.id)
     except AttributeError:
         await app.delete_messages(msg.chat.id,msg.id)
+
+@app.on_message(filters.command('read',prefixes='.') & filters.me)
+async def read(_,msg):
+    async for dialog in app.get_dialogs():
+        try:
+            await app.read_chat_history(dialog.id)
+        except AttributeError:
+            pass
 #On messages
 @app.on_message(filters.all | filters.me | filters.private)
 async def write_self(_,msg):
