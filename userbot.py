@@ -22,6 +22,26 @@ config.read(r'./settings.ini')
 api_id = config.get('main','api_id')
 api_hash = config.get('main','api_hash')
 app = Client('my_account',api_id=api_id, api_hash=api_hash)
+
+if not os.path.isfile('./settings.ini'):
+    with open('settings.ini','w') as cfg:
+        cfg.write('''
+[main]
+api_id = ???
+api_hash = ???
+prefix = .
+htext = f
+hide = f
+autoreac = f
+tts = f
+jac = f
+font = f
+oleg = f
+''')
+    print('Created config!\nFill api_id and api_hash')
+
+prefix = str(config.get('main','prefix'))
+
 #Settings
 try:
     htext = Setting('htext',config.get('main','htext'))
@@ -48,7 +68,7 @@ except configparser.NoOptionError as e:
         exit()
 stop=False
 #System
-@app.on_message(filters.command('set', prefixes='.') & filters.me)
+@app.on_message(filters.command('set', prefixes=prefix) & filters.me)
 async def set(_, msg):
     try:
         what = msg.text.split(' ')[1]
@@ -79,12 +99,12 @@ async def set(_, msg):
             await warn(app,msg,f'Настройка {what} успешно сохранена!',False)
         except IndexError:
             await warn(app,msg,'Введите настройку')
-@app.on_message(filters.command('profile', prefixes='.') & filters.me)
+@app.on_message(filters.command('profile', prefixes=prefix) & filters.me)
 async def profile(_,msg):
     await getprofile(msg)
 #Commands
 #Messages
-@app.on_message(filters.command('type', prefixes='.') & filters.me)
+@app.on_message(filters.command('type', prefixes=prefix) & filters.me)
 async def type(_, msg):
     orig_text = msg.text.split(' ', maxsplit=1)[1]
     tbp = ''
@@ -98,7 +118,7 @@ async def type(_, msg):
             await asyncio.sleep(0.05)
         break
 
-@app.on_message(filters.command('hackerstr', prefixes='.') & filters.me)
+@app.on_message(filters.command('hackerstr', prefixes=prefix) & filters.me)
 async def hackerstr(_,msg):
     try:
         lenght = msg.text.split(' ', maxsplit=1)[1]
@@ -110,7 +130,7 @@ async def hackerstr(_,msg):
         except errors.MessageTooLong:
             await warn(app,msg,'Ваше сообщение слишком длинное!',False)
 
-@app.on_message(filters.command('spam', prefixes='.') & filters.me)
+@app.on_message(filters.command('spam', prefixes=prefix) & filters.me)
 async def spam(_, msg):
     await msg.delete()
     try:
@@ -123,7 +143,7 @@ async def spam(_, msg):
         await asyncio.sleep(2)
         await msg.delete()
 
-@app.on_message(filters.command('tts', prefixes='.') & filters.me)
+@app.on_message(filters.command('tts', prefixes=prefix) & filters.me)
 async def tts(_, msg):
     from gtts import gTTS
     try:lang = str(msg.text).split(' ')[1]
@@ -142,12 +162,12 @@ async def tts(_, msg):
             tts.save('voice.mp3')
             await app.send_voice(msg.chat.id,'voice.mp3')
 
-@app.on_message(filters.command('hide', prefixes='.') & filters.me)
+@app.on_message(filters.command('hide', prefixes=prefix) & filters.me)
 async def hide(_, msg):
     await msg.edit('||'+msg.text[4:]+'||')
 
 #Misc
-@app.on_message(filters.command('hack', prefixes='.') & filters.me)
+@app.on_message(filters.command('hack', prefixes=prefix) & filters.me)
 async def hack(_, msg):
     user = msg.text.split(' ',maxsplit=1)[1]
     await msg.edit('Начинаю взлом...')
@@ -157,7 +177,7 @@ async def hack(_, msg):
     await asyncio.sleep(0.6)
     await msg.edit(f'{user} успешно взломан!\nАйпи: {getrandomip()}\nГеолокация: {getrandomgeo()}\nHwid: {getrandomhwid()}')
 
-@app.on_message(filters.command('rand',prefixes='.') & filters.me)
+@app.on_message(filters.command('rand',prefixes=prefix) & filters.me)
 async def rand(_,msg):
     from random import randint
     try:
@@ -169,31 +189,31 @@ async def rand(_,msg):
     except ValueError:
         await warn(app,msg,'Укажите 2 число не больше первого!',False)
 
-@app.on_message(filters.command('ghoul',prefixes='.') & filters.me)
+@app.on_message(filters.command('ghoul',prefixes=prefix) & filters.me)
 async def ghoul(_,msg):
     await ghoul_anim(msg)
 
-@app.on_message(filters.command('rsky',prefixes='.') & filters.me)
+@app.on_message(filters.command('rsky',prefixes=prefix) & filters.me)
 async def rsky(_,msg):
     await usky(msg)
 
-@app.on_message(filters.command('jac',prefixes='.') & filters.me)
+@app.on_message(filters.command('jac',prefixes=prefix) & filters.me)
 async def jac(_,msg):
     await jac_img(app,msg)
 
-@app.on_message(filters.command('meme',prefixes='.') & filters.me)
+@app.on_message(filters.command('meme',prefixes=prefix) & filters.me)
 async def meme_command(_,msg):
     try:mem = str(msg.text).split(' ')[1]
     except IndexError:await warn(app,msg,','.join(umemes));return None
     await meme(app,msg,mem)
     await msg.delete()
 
-@app.on_message(filters.command('олег', prefixes='.') & filters.all)
+@app.on_message(filters.command('олег', prefixes=prefix) & filters.all)
 async def oleg(_,msg):
     if olegset.getstatus() == 't':
         await meme(app,msg,'oleg')
 
-@app.on_message(filters.command('math', prefixes='.') & filters.me)
+@app.on_message(filters.command('math', prefixes=prefix) & filters.me)
 async def math(_,msg):
     try:num1 = str(msg.text).split(' ')[1]
     except IndexError:await warn(app,msg,'Введите первое число!')
@@ -205,7 +225,7 @@ async def math(_,msg):
         await umath(msg,num1,operation,num2)
 
 #Help
-@app.on_message(filters.command('help', prefixes='.') & filters.me)
+@app.on_message(filters.command('help', prefixes=prefix) & filters.me)
 async def help(_, msg):
     settings = [str(i[0])+' ' for i in settings_list.items()]
     await msg.edit(f'''<code>
@@ -231,37 +251,59 @@ async def help(_, msg):
 .getmsg -> Вы должны ответить на сообщение! - выводит данные сообщения в консоль
 .ню -> Вы должны ответить на сообщение! - пересылает сообщение в облако
 .python (eval expression) - выполняет код пайтона
-.read - читает все сообщения
+.prefix (новый префикс) - меняет префикс
 .online - Делает вас всегда в онлайне
 .offline - Останавливает команду .online
 .update - обновляет юзер бота
-.restart - перезапускает юзер бота</code>
+.restart - перезапускает юзер бота
+.quit - выходит из юзер бота</code>
 ''')
-@app.on_message(filters.command('stop',prefixes='.') & filters.me)
+@app.on_message(filters.command('stop',prefixes=prefix) & filters.me)
 async def stop(_,msg):
     changestop(True)
     await msg.delete()
 
-@app.on_message(filters.command('python',prefixes='.') & filters.me)
+@app.on_message(filters.command('python',prefixes=prefix) & filters.me)
 async def python(_,msg):
     run = str(msg.text).split(' ')[1:]
     eval_output = eval(' '.join(run))
 
     await msg.edit(eval_output)
 
-@app.on_message(filters.command('del',prefixes='.') & filters.me)
+@app.on_message(filters.command('prefix',prefixes=prefix) & filters.me)
+async def prefix_com(_,msg):
+    try:new_prefix = str(msg.text).split(' ')[1]
+    
+    except IndexError:
+        await warn(app,msg,'Введите новый префикс!')
+    
+    else:
+        prefix = str(new_prefix)
+
+        config.set('main','prefix',str(new_prefix))
+        config.write(open('settings.ini','w'))
+
+        await warn(app,msg,'Сохранен новый префикс! Перезапуск юзер бота!')
+
+        if str(platform.system()).lower() == 'linux':
+            execl(sys.executable, 'python', __file__, *sys.argv[1:])
+        elif str(platform.system()).lower() == 'windows':
+            execl(sys.executable, 'python', __file__, *sys.argv[1:])
+        exit()
+
+@app.on_message(filters.command('del',prefixes=prefix) & filters.me)
 async def delete(_,msg):
     if msg.from_user.is_self==True:
         await app.delete_messages(msg.chat.id,msg.reply_to_message_id)
         await msg.delete()
     elif msg.from_user.is_self==False:
         await warn(app,msg,'Это не ваше сообщение!',False)
-@app.on_message(filters.command('getmsg',prefixes='.') & filters.me)
+@app.on_message(filters.command('getmsg',prefixes=prefix) & filters.me)
 async def getmsg(_,msg):
     print(msg)
     await warn(app,msg,'Данные выведены в консоль',False)
 
-@app.on_message(filters.command('online',prefixes='.') & filters.me)
+@app.on_message(filters.command('online',prefixes=prefix) & filters.me)
 async def online(_,msg):
     global stoponline
     await warn(app,msg,'Always Online')
@@ -273,19 +315,19 @@ async def online(_,msg):
         elif stoponline==True:
             stoponline=False
             break
-@app.on_message(filters.command('offline',prefixes='.') & filters.me)
+@app.on_message(filters.command('offline',prefixes=prefix) & filters.me)
 async def offline(_,msg):
     global stoponline
     await warn(app,msg,'Перестаём быть в онлайне!')
     stoponline=True
 
-@app.on_message(filters.command('update',prefixes='.') & filters.me)
+@app.on_message(filters.command('update',prefixes=prefix) & filters.me)
 async def update(_,msg):
     await msg.edit('<code>Обновление юзер бота!</code>')
     check_version(True)
     await warn(app,msg,'Обновление успешно завершено! напишите команду .restart для перезагрузки')
 
-@app.on_message(filters.command('restart',prefixes='.') & filters.me)
+@app.on_message(filters.command('restart',prefixes=prefix) & filters.me)
 async def restart(_,msg):
     await warn(app,msg,'Перезагрузка юзер бота! подождите 5-10 секунд')
     if str(platform.system()).lower() == 'linux':
@@ -294,7 +336,7 @@ async def restart(_,msg):
         execl(sys.executable, 'python', __file__, *sys.argv[1:])
     exit()
 
-@app.on_message(filters.command('ню',prefixes='.') & filters.me)
+@app.on_message(filters.command('ню',prefixes=prefix) & filters.me)
 async def ny(_,msg):
     try:
         await app.delete_messages(msg.chat.id,msg.id)
@@ -302,13 +344,13 @@ async def ny(_,msg):
     except AttributeError:
         await app.delete_messages(msg.chat.id,msg.id)
 
-@app.on_message(filters.command('read',prefixes='.') & filters.me)
-async def read(_,msg):
-    async for dialog in app.get_dialogs():
-        try:
-            await app.read_chat_history(dialog.id)
-        except AttributeError:
-            pass
+@app.on_message(filters.command('quit',prefixes=prefix) & filters.me)
+async def quit_com(_,msg):
+
+    await warn(app,msg,'Выключаем юзер бота!')
+
+    quit()
+
 #On messages
 @app.on_message(filters.all | filters.me | filters.private)
 async def write_self(_,msg):
