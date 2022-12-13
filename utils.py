@@ -4,7 +4,7 @@ from download import download
 from asyncio import sleep
 from PIL import ImageDraw,ImageFont,Image
 import io
-import os,shutil
+import os,shutil,sys
 import configparser
 import requests
 import math, random
@@ -93,7 +93,6 @@ def getrandomip():
     return socket.inet_ntoa(struct.pack('>I', random.randint(1, 0xffffffff)))
 
 def getrandomhwid():
-
     random_ascii = string.ascii_uppercase
     random_digits = string.digits
     hwid = ''
@@ -101,6 +100,10 @@ def getrandomhwid():
         hwid+=random.choice(random_ascii)
         hwid+=random.choice(random_digits)
     return hwid
+
+def str_to_class(classname):#return class
+    return getattr(sys.modules[__name__], classname)
+
 def getlogo():
     header = '''
   _    _               ____        _   
@@ -123,6 +126,27 @@ class Setting:
         return self.status
     def setstatus(self,newstatus):
         self.status = newstatus
+
+memes = []
+
+class Meme:
+    def __init__(self,name,category,url):
+        self.name = name
+        self.category = category
+        self.url = url
+        memes.append(self)
+
+    async def send(self,app,msg):
+        if type(self.url) == str:
+            await app.send_sticker(msg.chat.id,self.url)
+        elif type(self.url) == list:
+            await app.send_sticker(msg.chat.id,random.choice(self.url))
+    
+    def getname(self):
+        return self.name
+
+    def getcategory(self):
+        return self.category
 #For msgs
 async def warn(app,msg,warn: str,alt = False,delay = 3):
     if alt==False:
@@ -133,6 +157,7 @@ async def warn(app,msg,warn: str,alt = False,delay = 3):
         warn_msg = await app.send_msg(msg.chat.id,'<code>'+str(warn)+'</code>')
         await sleep(delay)
         await warn_msg.delete()
+
 async def getprofile(msg):
     with open('version.txt') as f:
         version = f.read()
@@ -266,37 +291,24 @@ async def jac_img(app,msg,setting=False):
     img.save(out)
     out.seek(0)
     await app.send_photo(msg.chat.id,out)
-umemes = ['uno','like','salt','vojac','femboy','oleg','bruh']
-async def meme(app: Client,msg,meme):
-    if meme == 'uno':#карточки реверса
-        uno_cards_urls = ['CAACAgQAAxkBAAL2wWNZDQ9KquGC7PDmBeJz8zNUIZFAAAIFAAPVcf0xIvIu5opGXfMeBA','CAACAgQAAxkBAAL2w2NZDWTAis0LomAb4mndQmK5ZXb5AAIEAAPVcf0xXSRFIA9A-v4eBA','CAACAgQAAxkBAAL2xGNZDWSiIjvV-G3ItXZBB4TvBUzZAAIDAAPVcf0xtgnebiE3rAEeBA','CAACAgQAAxkBAAL2xWNZDWQuQdQsB3PkdZCsLb3hqHanAAICAAPVcf0x1qyFAAFPPAsOHgQ']
-        random_card = random.choice(uno_cards_urls)
-        await app.send_sticker(msg.chat.id, random_card)
-        await msg.delete()
-    
-    elif meme == 'like':#лайк
-        likes_urls = ['CAACAgIAAxkBAAL2_WNZDrV6Zgc4pmMJTdoJC-8gPXEdAAKPGAACh-4hSbfyhIqPrJeUHgQ','CAACAgIAAxkBAAL2_mNZDrvyu-25Jm3VDERwXQthLuyRAAI0AAOROZwcpUsVS-iiqS8eBA']
-        random_like = random.choice(likes_urls)
-        await app.send_sticker(msg.chat.id,random_like)
-        await msg.delete()
-    
-    elif meme == 'salt':#соль
-        await msg.delete()
-        await app.send_sticker(msg.chat.id,'CAACAgIAAxkBAAL3S2NZEhHTWI96BhcvSvVB48TB9jvfAAIOGAACaJzQS2XR7x4eNashHgQ')
-    
-    elif meme == 'vojak':
-        vojac_urls = ['CAACAgQAAxkBAAL3T2NZEiOODzyS00sTBJA1gidAwt_eAAIFAQAC5JMqMIzUKlEXfKTPHgQ','CAACAgQAAxkBAAL3TGNZEhd-fYe2PuXs0ySabFhtxrNtAAIEAQAC5JMqMBtErOcuQV9AHgQ']
-        random_vojak = random.choice(vojac_urls)
-        await app.send_sticker(msg.chat.id,random_vojak)
-        await msg.delete()
-    
-    elif meme == 'femboy':
-        await app.send_sticker(msg.chat.id,'CAACAgIAAxkDAAEBnv1jk3S0p1-Gb8eeCdI66kmqyhps8AACHyIAAj3TiUjy-U0IEBjqWR4E')
+#Memes
+meme_uno = Meme('Uno','Games',['CAACAgQAAxkBAAL2wWNZDQ9KquGC7PDmBeJz8zNUIZFAAAIFAAPVcf0xIvIu5opGXfMeBA','CAACAgQAAxkBAAL2w2NZDWTAis0LomAb4mndQmK5ZXb5AAIEAAPVcf0xXSRFIA9A-v4eBA','CAACAgQAAxkBAAL2xGNZDWSiIjvV-G3ItXZBB4TvBUzZAAIDAAPVcf0xtgnebiE3rAEeBA','CAACAgQAAxkBAAL2xWNZDWQuQdQsB3PkdZCsLb3hqHanAAICAAPVcf0x1qyFAAFPPAsOHgQ'])
+meme_like = Meme('Like','Emote',['CAACAgIAAxkBAAL2_WNZDrV6Zgc4pmMJTdoJC-8gPXEdAAKPGAACh-4hSbfyhIqPrJeUHgQ','CAACAgIAAxkBAAL2_mNZDrvyu-25Jm3VDERwXQthLuyRAAI0AAOROZwcpUsVS-iiqS8eBA'])
+meme_salt = Meme('Salt','Item','CAACAgIAAxkBAAL3S2NZEhHTWI96BhcvSvVB48TB9jvfAAIOGAACaJzQS2XR7x4eNashHgQ')
+meme_vojac = Meme('Vojac','Emote',['CAACAgQAAxkBAAL3T2NZEiOODzyS00sTBJA1gidAwt_eAAIFAQAC5JMqMIzUKlEXfKTPHgQ','CAACAgQAAxkBAAL3TGNZEhd-fYe2PuXs0ySabFhtxrNtAAIEAQAC5JMqMBtErOcuQV9AHgQ'])
+meme_femboy = Meme('Femboy','Cring','CAACAgIAAxkDAAEBnv1jk3S0p1-Gb8eeCdI66kmqyhps8AACHyIAAj3TiUjy-U0IEBjqWR4E')
+meme_femkiss = Meme('Femkiss','Cring','CAACAgIAAxkDAAEByFNjmD0WQfCltUPXMJojwhfH9qCzfwACkyEAAmWJiUhQ5-ExHW4vWR4E')
+meme_oleg = Meme('Oleg','Emote','CAACAgIAAx0CZwXFtAABAbNtY5SIosrOCxj9HQIoidO27ydBZocAAhEVAAJLhgABSJ6bJubgLqHXHgQ')
+meme_bruh = Meme('Bruh','Emote','CAACAgIAAx0EcPHO9gACDrhjlvgc2L9WeDjEJwYTdC9IDDRMDgACaxUAAvhCAAFI6ZIBkR_3m9QeBA')
+meme_hard = Meme('Hard','Item','CAACAgIAAxkBAAEByWZjmFO67mnzSGdrQpksKgHMcCOl5wAC6xgAAnCIoUk9DxK770v4jx4E')
 
-    elif meme == 'oleg':
-        await app.send_sticker(msg.chat.id,'CAACAgIAAx0CZwXFtAABAbNtY5SIosrOCxj9HQIoidO27ydBZocAAhEVAAJLhgABSJ6bJubgLqHXHgQ')
 
-    elif meme == 'bruh':
-        await app.send_sticker(msg.chat.id,'CAACAgIAAx0EcPHO9gACDrhjlvgc2L9WeDjEJwYTdC9IDDRMDgACaxUAAvhCAAFI6ZIBkR_3m9QeBA')
+umemes = {}
+for mem in memes:
+    try:
+        umemes[str(mem.getcategory()).lower()]
+    except KeyError:
+        umemes[str(mem.getcategory()).lower()] = []    
 
-    #Removed not working memes
+for mem in memes:
+    umemes[str(mem.getcategory()).lower()].append(mem)

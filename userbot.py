@@ -1,13 +1,13 @@
-import asyncio
-from os import execl, path
-import platform
-import sqlite3
-import sys
-from pyrogram import *
 from pyrogram import errors
+from os import execl, path
+from pyrogram import *
 from utils import *
 import configparser
-
+import platform
+import asyncio
+import sqlite3
+import sys
+from datetime import datetime
 os.chdir(sys.path[0])
 
 stoponline=False
@@ -105,7 +105,7 @@ async def profile(_,msg):
 #Commands
 #Messages
 @app.on_message(filters.command('type', prefixes=prefix) & filters.me)
-async def type(_, msg):
+async def type_com(_, msg):
     orig_text = msg.text.split(' ', maxsplit=1)[1]
     tbp = ''
     while True:
@@ -203,15 +203,25 @@ async def jac(_,msg):
 
 @app.on_message(filters.command('meme',prefixes=prefix) & filters.me)
 async def meme_command(_,msg):
-    try:mem = str(msg.text).split(' ')[1]
-    except IndexError:await warn(app,msg,','.join(umemes));return None
-    await meme(app,msg,mem)
-    await msg.delete()
+    
+    try:category = str(msg.text).split(' ')[1]
+    except IndexError:await warn(app,msg,','.join(umemes.keys()));return None
+    try:meme = str(msg.text).split(' ')[2]
+    except IndexError:
+        try:umemes[str(category).lower()]
+        except KeyError:await warn(app,msg,','.join(umemes.keys()));return None
+        await warn(app,msg,','.join([m.getname() for m in umemes[str(category).lower()]]));return None
+    else:
+        for memas in umemes[str(category).lower()]:
+            if meme.capitalize() == memas.getname():
+                await memas.send(app,msg)
+                await msg.delete()
+                break
 
 @app.on_message(filters.command('олег', prefixes=prefix) & filters.all)
 async def oleg(_,msg):
     if olegset.getstatus() == 't':
-        await meme(app,msg,'oleg')
+        await umemes['Emotions'][list(umemes['Emotions']).index('Oleg')].send()
 
 @app.on_message(filters.command('math', prefixes=prefix) & filters.me)
 async def math(_,msg):
@@ -383,7 +393,7 @@ async def write_self(_,msg):
                 await app.send_reaction(msg.chat.id, msg.id, choice(random_emoji))
 def run():#Run userbot
     print(getlogo(),end='')
-    print(f'By: https://t.me/PLNT_YT\nYour system is: {str(platform.system())}')
+    print(f'By: https://t.me/PLNT_YT\nYour system is: {str(platform.system())}\nStarted at: '+datetime.now().strftime('%m/%d/%Y - %H:%M'))
     try:
         app.run()
     except sqlite3.OperationalError as e:
