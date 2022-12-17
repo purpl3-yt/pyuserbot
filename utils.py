@@ -137,9 +137,11 @@ class Meme:
         memes.append(self)
 
     async def send(self,app,msg):
-        if type(self.url) == str:
+        if type(self.url) == str and str(self.url).startswith('CAAC'):
             await app.send_sticker(msg.chat.id,self.url)
-        elif type(self.url) == list:
+        if type(self) == str and not str(self.url).startswith('CAAC'):
+            await app.send_message(msg.chat.id,self.url)
+        if type(self.url) == list:
             await app.send_sticker(msg.chat.id,random.choice(self.url))
     
     def getname(self):
@@ -223,8 +225,8 @@ async def ghoul_anim(msg):
         try:
             await msg.edit(i)
         except FloodWait as wait:
-            sleep(wait)
-        sleep(0.1)
+            await sleep(wait)
+        await sleep(0.1)
 
 async def usky(msg):
     global stop
@@ -296,12 +298,12 @@ meme_uno = Meme('Uno','Games',['CAACAgQAAxkBAAL2wWNZDQ9KquGC7PDmBeJz8zNUIZFAAAIF
 meme_like = Meme('Like','Emote',['CAACAgIAAxkBAAL2_WNZDrV6Zgc4pmMJTdoJC-8gPXEdAAKPGAACh-4hSbfyhIqPrJeUHgQ','CAACAgIAAxkBAAL2_mNZDrvyu-25Jm3VDERwXQthLuyRAAI0AAOROZwcpUsVS-iiqS8eBA'])
 meme_salt = Meme('Salt','Item','CAACAgIAAxkBAAL3S2NZEhHTWI96BhcvSvVB48TB9jvfAAIOGAACaJzQS2XR7x4eNashHgQ')
 meme_vojac = Meme('Vojac','Emote',['CAACAgQAAxkBAAL3T2NZEiOODzyS00sTBJA1gidAwt_eAAIFAQAC5JMqMIzUKlEXfKTPHgQ','CAACAgQAAxkBAAL3TGNZEhd-fYe2PuXs0ySabFhtxrNtAAIEAQAC5JMqMBtErOcuQV9AHgQ'])
-meme_femboy = Meme('Femboy','Cring','CAACAgIAAxkDAAEBnv1jk3S0p1-Gb8eeCdI66kmqyhps8AACHyIAAj3TiUjy-U0IEBjqWR4E')
-meme_femkiss = Meme('Femkiss','Cring','CAACAgIAAxkDAAEByFNjmD0WQfCltUPXMJojwhfH9qCzfwACkyEAAmWJiUhQ5-ExHW4vWR4E')
+meme_femboy = Meme('Femboy','Cringe','CAACAgIAAxkDAAEBnv1jk3S0p1-Gb8eeCdI66kmqyhps8AACHyIAAj3TiUjy-U0IEBjqWR4E')
+meme_femkiss = Meme('Femkiss','Cringe','CAACAgIAAxkDAAEByFNjmD0WQfCltUPXMJojwhfH9qCzfwACkyEAAmWJiUhQ5-ExHW4vWR4E')
 meme_oleg = Meme('Oleg','Emote','CAACAgIAAx0CZwXFtAABAbNtY5SIosrOCxj9HQIoidO27ydBZocAAhEVAAJLhgABSJ6bJubgLqHXHgQ')
 meme_bruh = Meme('Bruh','Emote','CAACAgIAAx0EcPHO9gACDrhjlvgc2L9WeDjEJwYTdC9IDDRMDgACaxUAAvhCAAFI6ZIBkR_3m9QeBA')
 meme_hard = Meme('Hard','Item','CAACAgIAAxkBAAEByWZjmFO67mnzSGdrQpksKgHMcCOl5wAC6xgAAnCIoUk9DxK770v4jx4E')
-
+meme_drink = Meme('Drink','Item','CAACAgIAAxkDAAEB5QxjnYjat9Bc2P64Sh5CkKI2wes23wACExcAAsISAAFIimUEhOYchxoeBA')
 
 umemes = {}
 for mem in memes:

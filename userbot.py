@@ -212,16 +212,17 @@ async def meme_command(_,msg):
         except KeyError:await warn(app,msg,','.join(umemes.keys()));return None
         await warn(app,msg,','.join([m.getname() for m in umemes[str(category).lower()]]));return None
     else:
+        await msg.delete()
         for memas in umemes[str(category).lower()]:
             if meme.capitalize() == memas.getname():
                 await memas.send(app,msg)
-                await msg.delete()
                 break
 
 @app.on_message(filters.command('олег', prefixes=prefix) & filters.all)
 async def oleg(_,msg):
     if olegset.getstatus() == 't':
-        await umemes['Emotions'][list(umemes['Emotions']).index('Oleg')].send()
+        print(umemes['emote'])
+        await umemes['emote'][list(umemes['emote']).index('Oleg')].send()
 
 @app.on_message(filters.command('math', prefixes=prefix) & filters.me)
 async def math(_,msg):
