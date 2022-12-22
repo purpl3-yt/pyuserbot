@@ -304,6 +304,10 @@ meme_oleg = Meme('Oleg','Emote','CAACAgIAAx0CZwXFtAABAbNtY5SIosrOCxj9HQIoidO27yd
 meme_bruh = Meme('Bruh','Emote','CAACAgIAAx0EcPHO9gACDrhjlvgc2L9WeDjEJwYTdC9IDDRMDgACaxUAAvhCAAFI6ZIBkR_3m9QeBA')
 meme_hard = Meme('Hard','Item','CAACAgIAAxkBAAEByWZjmFO67mnzSGdrQpksKgHMcCOl5wAC6xgAAnCIoUk9DxK770v4jx4E')
 meme_drink = Meme('Drink','Item','CAACAgIAAxkDAAEB5QxjnYjat9Bc2P64Sh5CkKI2wes23wACExcAAsISAAFIimUEhOYchxoeBA')
+meme_idk = Meme('Idk','Emote','CAACAgIAAxkDAAEB_lxjoB4s8JnjrONFiaelO3e-qzRHDgACmwADkTmcHJTkgPOvMYNPHgQ')
+meme_cool = Meme('Cool','Emote','CAACAgIAAxkBAAEB_m5joB6XSUpy0zL3xiXGnyQPF4DhPgACPg8AAn9puUvb6DZzd3HGxR4E')
+meme_sus = Meme('Sus','Emote','CAACAgIAAxkBAAEB_nBjoB67rlYHCZTHQQNWffUOe4qVUQACJCAAAv-n-Eg1mD0n5qr6Nh4E')
+meme_gigachad = Meme('Gigachad','Emote','CAACAgQAAxkBAAEB_nJjoB7aQWNRtz-3d1gZGWZT7DycZQACEgMAAqHa1A9Qu6d81h2qdB4E')
 
 umemes = {}
 for mem in memes:

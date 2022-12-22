@@ -1,4 +1,4 @@
-from pyrogram import errors
+from pyrogram import errors,enums
 from os import execl, path
 from pyrogram import *
 from utils import *
@@ -244,6 +244,7 @@ async def help(_, msg):
 .set (настройка) (статус) - меняет настройки
 Настройки: {' '.join(settings)}
 .profile - показывает профиль пользователя, если написать команду в ответ другому юзеру выведет его инфу
+.info - информация об юзер боте
 .type (текст) - делает анимацию текста
 .hide (текст) - делает текст спойлером
 .hackerstr (текст) - делает строку с разными символами
@@ -263,6 +264,7 @@ async def help(_, msg):
 .ню -> Вы должны ответить на сообщение! - пересылает сообщение в облако
 .python (eval expression) - выполняет код пайтона
 .prefix (новый префикс) - меняет префикс
+.action (действие) - делает действие 
 .online - Делает вас всегда в онлайне
 .offline - Останавливает команду .online
 .update - обновляет юзер бота
@@ -273,6 +275,22 @@ async def help(_, msg):
 async def stop(_,msg):
     changestop(True)
     await msg.delete()
+
+@app.on_message(filters.command('info',prefixes=prefix) & filters.me)
+async def info(_,msg):
+    chat_id = msg.chat.id
+    await msg.delete()
+    lines_files = ['userbot.py','utils.py','main.py']
+    lines = 0
+    for file in lines_files:
+        with open(file,'r',encoding='cp1251',errors='ignore') as py_file:
+            data = py_file.read()
+            data = data.split('\n')
+            lines+=len(data)
+    await app.send_message(chat_id,f'''
+В юзерботе {str(lines)} строчек кода
+<a href="https://github.com/purpl3-yt/pyuserbot">Код юзербота</a>''',disable_web_page_preview=True)
+
 
 @app.on_message(filters.command('python',prefixes=prefix) & filters.me)
 async def python(_,msg):
@@ -331,6 +349,29 @@ async def offline(_,msg):
     global stoponline
     await warn(app,msg,'Перестаём быть в онлайне!')
     stoponline=True
+
+@app.on_message(filters.command('action',prefixes=prefix) & filters.me)
+async def action(_,msg):
+    chat_id = msg.chat.id
+
+    actions = {
+        'video':enums.ChatAction.RECORD_VIDEO,
+        'audio':enums.ChatAction.RECORD_AUDIO,
+        'sticker':enums.ChatAction.CHOOSE_STICKER,
+        'contact':enums.ChatAction.CHOOSE_CONTACT,
+        'play':enums.ChatAction.PLAYING,
+        'type':enums.ChatAction.TYPING,
+        'upload_audio':enums.ChatAction.UPLOAD_AUDIO,
+        'upload_video':enums.ChatAction.UPLOAD_VIDEO,
+        'upload_document':enums.ChatAction.UPLOAD_DOCUMENT,
+        'cancel':enums.ChatAction.CANCEL}
+    try:mode = str(str(msg.text).split(' ')[1]).lower()
+    except IndexError:await warn(app,msg,'Выберите режим! '+', '.join(list(actions.keys())));return None
+    else:
+        await msg.delete()
+        await app.send_chat_action(chat_id,actions[mode])
+
+        await sleep(random.randint(30,60))
 
 @app.on_message(filters.command('update',prefixes=prefix) & filters.me)
 async def update(_,msg):
