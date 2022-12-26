@@ -92,7 +92,7 @@ async def set(_, msg):
         set.setstatus(status)
 
     except KeyError:
-        await warn(app,msg,'Такой настройки нету!')
+        await warn(app,msg,'Такой настройки нет!')
     else:
         try:
             await warn(app,msg,f'Настройка {what} успешно сохранена!',False)
@@ -151,7 +151,7 @@ async def hackerstr_com(_,msg):
         try:
             await msg.edit(generatehackerstr(int(lenght)))
         except errors.MessageTooLong:
-            await warn(app,msg,'Ваше сообщение слишком длинное!',False)
+            await warn(app,msg,'Сообщение слишком длинное!',False)
 
 @app.on_message(filters.command('like',prefixes=prefix) & filters.me)
 async def like_com(_,msg):
@@ -193,7 +193,7 @@ async def tts_com(_, msg):
         try:
             tts = gTTS(str(' '.join(text)),lang=lang)
         except ValueError:
-            await warn(app,msg,'Такого языка нету!',True)
+            await warn(app,msg,'Нет такого языка!',True)
         else:
             await msg.delete()        
             tts.save('voice.mp3')
@@ -224,7 +224,7 @@ async def rand_com(_,msg):
     try:
         await msg.edit('<code>'+str(randint(int(nums[0]),int(nums[1])))+'</code>')
     except ValueError:
-        await warn(app,msg,'Укажите 2 число не больше первого!',False)
+        await warn(app,msg,'Второе число должно быть не больше первого.',False)
 
 @app.on_message(filters.command('ghoul',prefixes=prefix) & filters.me)
 async def ghoul_com(_,msg):
@@ -271,35 +271,35 @@ async def help_com(_, msg):
     settings = [str(i[0])+' ' for i in settings_list.items()]
     await msg.edit(f'''<code>
 Доступные команды:
-.set (настройка) (статус) - меняет настройки
+.set (настройка) (статус) - Меняет настройки
 Настройки: {' '.join(settings)}
-.profile - показывает профиль пользователя, если написать команду в ответ другому юзеру выведет его инфу
-.info - информация об юзер боте
-.type (текст) - делает анимацию текста
-.hide (текст) - делает текст спойлером
-.hackerstr (текст) - делает строку с разными символами
-.hack (пользователь) - "взламывает" пользователя
+.profile - Показывает профиль пользователя, если написать в ответ на сообщение другого пользователя можно также увидеть его профиль
+.info - Информация об юзер боте
+.type (текст) - Анимация текста
+.hide (текст) - Скрытый текст
+.hackerstr (текст) - Строка с разными символами
+.hack (пользователь) - "Взламывает" пользователя
 .spam (количество) (текст) - спамит сообщениями
 .tts (в какой язык [en,ru,etc]) (текст) - отправляет голосовое сообщение с текстом
 .rand (первое число) (второе число) - генерирует рандомное число
 .math (первое число) (оператор [+,-,/]) (второе число)
 .ghoul - считает 1000-1 #deadinside
-.rsky - делает разноцветное небо
-.jac (текст) - делает цитату жака фреско
+.rsky - Делает разноцветное небо
+.jac (текст) - Цитата Жака Фреско
 .meme (мем) - отправляет мем
 .like (лимит) - лайкает сообщения
 .split (текст) - делает из текста, куча сообщений с 1 символом
-.stop - останавливает процесс, например когда ключена команда .ghoul
+.stop - останавливает процесс, например, когда ключена команда .ghoul
 .del -> Вы должны ответить на сообщение! - удаляет сообщение
 .getmsg -> Вы должны ответить на сообщение! - выводит данные сообщения в консоль
 .ню -> Вы должны ответить на сообщение! - пересылает сообщение в облако
-.python (eval expression) - выполняет код пайтона
+.python (eval expression) - выполняет python-код
 .prefix (новый префикс) - меняет префикс
-.action (действие) - делает действие 
-.online - Делает вас всегда в онлайне
+.action (действие) - выполняет действие 
+.online - Делает вас всегда в сети
 .offline - Останавливает команду .online
-.update - обновляет юзер бота
-.restart - перезапускает юзер бота
+.update - Обновляет юзер бота с GitHub-репозитория
+.restart - Перезапускает юзер бота
 .quit - выходит из юзер бота</code>
 ''')
 @app.on_message(filters.command('stop',prefixes=prefix) & filters.me)
@@ -335,7 +335,7 @@ async def prefix_com(_,msg):
     try:new_prefix = str(msg.text).split(' ')[1]
     
     except IndexError:
-        await warn(app,msg,'Введите новый префикс!')
+        await warn(app,msg,'Введите новый префикс.')
     
     else:
         prefix = str(new_prefix)
@@ -343,7 +343,7 @@ async def prefix_com(_,msg):
         config.set('main','prefix',str(new_prefix))
         config.write(open('settings.ini','w'))
 
-        await warn(app,msg,'Сохранен новый префикс! Перезапуск юзер бота!')
+        await warn(app,msg,'Сохранен новый префикс, перезапускаюсь...')
 
         if str(platform.system()).lower() == 'linux':
             execl(sys.executable, 'python', __file__, *sys.argv[1:])
@@ -357,11 +357,11 @@ async def delete_com(_,msg):
         await app.delete_messages(msg.chat.id,msg.reply_to_message_id)
         await msg.delete()
     elif msg.from_user.is_self==False:
-        await warn(app,msg,'Это не ваше сообщение!',False)
+        await warn(app,msg,'Это не ваше сообщение.',False)
 @app.on_message(filters.command('getmsg',prefixes=prefix) & filters.me)
 async def getmsg_com(_,msg):
     print(msg)
-    await warn(app,msg,'Данные выведены в консоль',False)
+    await warn(app,msg,'Данные выведены в консоль.',False)
 
 @app.on_message(filters.command('online',prefixes=prefix) & filters.me)
 async def online_com(_,msg):
@@ -410,13 +410,13 @@ async def action_com(_,msg):
 
 @app.on_message(filters.command('update',prefixes=prefix) & filters.me)
 async def update_com(_,msg):
-    await msg.edit('<code>Обновление юзер бота!</code>')
+    await msg.edit('<code>Обновляюсь...</code>')
     check_version(True)
-    await warn(app,msg,'Обновление успешно завершено! напишите команду .restart для перезагрузки')
+    await warn(app,msg,'Обновление прошло успешно, напишите .restart для перезагрузки.')
 
 @app.on_message(filters.command('restart',prefixes=prefix) & filters.me)
 async def restart_com(_,msg):
-    await warn(app,msg,'Перезагрузка юзер бота! подождите 5-10 секунд')
+    await warn(app,msg,'Перезагружаюсь, подождите пару секунд...')
     if str(platform.system()).lower() == 'linux':
         execl(sys.executable, 'python', __file__, *sys.argv[1:])
     elif str(platform.system()).lower() == 'windows':
@@ -433,7 +433,7 @@ async def ny_com(_,msg):
 
 @app.on_message(filters.command('quit',prefixes=prefix) & filters.me)
 async def quit_com(_,msg):
-    await warn(app,msg,'Выключаем юзер бота!')
+    await warn(app,msg,'Выключаюсь...')
 
     quit()
 
