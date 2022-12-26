@@ -308,6 +308,8 @@ meme_idk = Meme('Idk','Emote','CAACAgIAAxkDAAEB_lxjoB4s8JnjrONFiaelO3e-qzRHDgACm
 meme_cool = Meme('Cool','Emote','CAACAgIAAxkBAAEB_m5joB6XSUpy0zL3xiXGnyQPF4DhPgACPg8AAn9puUvb6DZzd3HGxR4E')
 meme_sus = Meme('Sus','Emote','CAACAgIAAxkBAAEB_nBjoB67rlYHCZTHQQNWffUOe4qVUQACJCAAAv-n-Eg1mD0n5qr6Nh4E')
 meme_gigachad = Meme('Gigachad','Emote','CAACAgQAAxkBAAEB_nJjoB7aQWNRtz-3d1gZGWZT7DycZQACEgMAAqHa1A9Qu6d81h2qdB4E')
+meme_dance = Meme('Dance','Emote','CAACAgIAAxkBAAECbZBjqZ0qUsILfOUfTFa25X5xdMftLgAC1hQAAm-4-UucNlgIIZ1nrh4E')
+meme_dance2 = Meme('Dance2','Emote','CAACAgIAAxkDAAECbsNjqaHvkCMetrk8cREpEnIpXSzDgwACSBYAApxiAUhjyjg_YD5u5R4E')
 
 umemes = {}
 for mem in memes:

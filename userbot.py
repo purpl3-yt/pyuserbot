@@ -1,4 +1,5 @@
 from pyrogram import errors,enums
+from datetime import datetime
 from os import execl, path
 from pyrogram import *
 from utils import *
@@ -7,7 +8,7 @@ import platform
 import asyncio
 import sqlite3
 import sys
-from datetime import datetime
+
 os.chdir(sys.path[0])
 
 stoponline=False
@@ -36,7 +37,6 @@ autoreac = f
 tts = f
 jac = f
 font = f
-oleg = f
 ''')
     print('Created config!\nFill api_id and api_hash')
 
@@ -49,9 +49,8 @@ try:
     autoreac = Setting('autoreac',config.get('main','autoreac'))
     ttsset = Setting('tts',config.get('main','tts'))
     jacset = Setting('jac',config.get('main','jac'))
-    olegset = Setting('oleg',config.get('main','oleg'))
     #Settings dict
-    settings_list = {'htext':htext,'hide':hideset,'autoreac':autoreac,'tts':ttsset,'jac':jacset,'oleg':olegset}
+    settings_list = {'htext':htext,'hide':hideset,'autoreac':autoreac,'tts':ttsset,'jac':jacset}
 except configparser.NoOptionError as e:
     from pathlib import Path
     option = str(e)
@@ -118,8 +117,32 @@ async def type_com(_, msg):
             await asyncio.sleep(0.05)
         break
 
+@app.on_message(filters.command('split', prefixes=prefix) & filters.me)
+async def split_com(_,msg):
+    try:text = str(msg.text).split(' ')[1:]
+    except IndexError:await warn(app,msg,'Введите текст!')
+    chat_id = msg.chat.id
+    await msg.delete()
+    conv_text = []
+
+    async def send_frame():
+        await app.send_message(chat_id,'<code>========</code>')
+
+    await send_frame()
+
+    for l in ' '.join(text):
+        if l==' ':
+            conv_text.append('ㅤ')
+        elif l!=' ':
+            conv_text.append(l)
+    
+    for t in conv_text:
+        await app.send_message(chat_id,'<b>'+t+'</b>')
+
+    await send_frame()
+
 @app.on_message(filters.command('hackerstr', prefixes=prefix) & filters.me)
-async def hackerstr(_,msg):
+async def hackerstr_com(_,msg):
     try:
         lenght = msg.text.split(' ', maxsplit=1)[1]
     except IndexError:
@@ -130,8 +153,22 @@ async def hackerstr(_,msg):
         except errors.MessageTooLong:
             await warn(app,msg,'Ваше сообщение слишком длинное!',False)
 
+@app.on_message(filters.command('like',prefixes=prefix) & filters.me)
+async def like_com(_,msg):
+    chat_id = msg.chat.id
+    try:limit = str(msg.text).split(' ')[1]
+    except IndexError:await warn(app,msg,'Введите лимит (10,100,etc)!');return None
+    else:
+        count=0
+        await msg.delete()
+        async for message in app.get_chat_history(chat_id):
+            await app.send_reaction(chat_id,message.id,'👍')
+            count+=1
+            if count>=int(limit):
+                break
+
 @app.on_message(filters.command('spam', prefixes=prefix) & filters.me)
-async def spam(_, msg):
+async def spam_com(_, msg):
     await msg.delete()
     try:
         spam_count = msg.text.split(' ')[1]
@@ -144,7 +181,7 @@ async def spam(_, msg):
         await msg.delete()
 
 @app.on_message(filters.command('tts', prefixes=prefix) & filters.me)
-async def tts(_, msg):
+async def tts_com(_, msg):
     from gtts import gTTS
     try:lang = str(msg.text).split(' ')[1]
     except IndexError:
@@ -163,12 +200,12 @@ async def tts(_, msg):
             await app.send_voice(msg.chat.id,'voice.mp3')
 
 @app.on_message(filters.command('hide', prefixes=prefix) & filters.me)
-async def hide(_, msg):
+async def hide_com(_, msg):
     await msg.edit('||'+msg.text[4:]+'||')
 
 #Misc
 @app.on_message(filters.command('hack', prefixes=prefix) & filters.me)
-async def hack(_, msg):
+async def hack_com(_, msg):
     user = msg.text.split(' ',maxsplit=1)[1]
     await msg.edit('Начинаю взлом...')
     await asyncio.sleep(1)
@@ -178,7 +215,7 @@ async def hack(_, msg):
     await msg.edit(f'{user} успешно взломан!\nАйпи: {getrandomip()}\nГеолокация: {getrandomgeo()}\nHwid: {getrandomhwid()}')
 
 @app.on_message(filters.command('rand',prefixes=prefix) & filters.me)
-async def rand(_,msg):
+async def rand_com(_,msg):
     from random import randint
     try:
         nums = (msg.text).split(' ')[1:]
@@ -190,20 +227,19 @@ async def rand(_,msg):
         await warn(app,msg,'Укажите 2 число не больше первого!',False)
 
 @app.on_message(filters.command('ghoul',prefixes=prefix) & filters.me)
-async def ghoul(_,msg):
+async def ghoul_com(_,msg):
     await ghoul_anim(msg)
 
 @app.on_message(filters.command('rsky',prefixes=prefix) & filters.me)
-async def rsky(_,msg):
+async def rsky_com(_,msg):
     await usky(msg)
 
 @app.on_message(filters.command('jac',prefixes=prefix) & filters.me)
-async def jac(_,msg):
+async def jac_com(_,msg):
     await jac_img(app,msg)
 
 @app.on_message(filters.command('meme',prefixes=prefix) & filters.me)
-async def meme_command(_,msg):
-    
+async def meme_com(_,msg):
     try:category = str(msg.text).split(' ')[1]
     except IndexError:await warn(app,msg,','.join(umemes.keys()));return None
     try:meme = str(msg.text).split(' ')[2]
@@ -218,14 +254,8 @@ async def meme_command(_,msg):
                 await memas.send(app,msg)
                 break
 
-@app.on_message(filters.command('олег', prefixes=prefix) & filters.all)
-async def oleg(_,msg):
-    if olegset.getstatus() == 't':
-        print(umemes['emote'])
-        await umemes['emote'][list(umemes['emote']).index('Oleg')].send()
-
 @app.on_message(filters.command('math', prefixes=prefix) & filters.me)
-async def math(_,msg):
+async def math_com(_,msg):
     try:num1 = str(msg.text).split(' ')[1]
     except IndexError:await warn(app,msg,'Введите первое число!')
     try:operation = str(msg.text).split(' ')[2]
@@ -237,7 +267,7 @@ async def math(_,msg):
 
 #Help
 @app.on_message(filters.command('help', prefixes=prefix) & filters.me)
-async def help(_, msg):
+async def help_com(_, msg):
     settings = [str(i[0])+' ' for i in settings_list.items()]
     await msg.edit(f'''<code>
 Доступные команды:
@@ -257,7 +287,8 @@ async def help(_, msg):
 .rsky - делает разноцветное небо
 .jac (текст) - делает цитату жака фреско
 .meme (мем) - отправляет мем
-.олег - отправляет олега
+.like (лимит) - лайкает сообщения
+.split (текст) - делает из текста, куча сообщений с 1 символом
 .stop - останавливает процесс, например когда ключена команда .ghoul
 .del -> Вы должны ответить на сообщение! - удаляет сообщение
 .getmsg -> Вы должны ответить на сообщение! - выводит данные сообщения в консоль
@@ -272,12 +303,12 @@ async def help(_, msg):
 .quit - выходит из юзер бота</code>
 ''')
 @app.on_message(filters.command('stop',prefixes=prefix) & filters.me)
-async def stop(_,msg):
+async def stop_com(_,msg):
     changestop(True)
     await msg.delete()
 
 @app.on_message(filters.command('info',prefixes=prefix) & filters.me)
-async def info(_,msg):
+async def info_com(_,msg):
     chat_id = msg.chat.id
     await msg.delete()
     lines_files = ['userbot.py','utils.py','main.py']
@@ -293,7 +324,7 @@ async def info(_,msg):
 
 
 @app.on_message(filters.command('python',prefixes=prefix) & filters.me)
-async def python(_,msg):
+async def python_com(_,msg):
     run = str(msg.text).split(' ')[1:]
     eval_output = eval(' '.join(run))
 
@@ -321,37 +352,37 @@ async def prefix_com(_,msg):
         exit()
 
 @app.on_message(filters.command('del',prefixes=prefix) & filters.me)
-async def delete(_,msg):
+async def delete_com(_,msg):
     if msg.from_user.is_self==True:
         await app.delete_messages(msg.chat.id,msg.reply_to_message_id)
         await msg.delete()
     elif msg.from_user.is_self==False:
         await warn(app,msg,'Это не ваше сообщение!',False)
 @app.on_message(filters.command('getmsg',prefixes=prefix) & filters.me)
-async def getmsg(_,msg):
+async def getmsg_com(_,msg):
     print(msg)
     await warn(app,msg,'Данные выведены в консоль',False)
 
 @app.on_message(filters.command('online',prefixes=prefix) & filters.me)
-async def online(_,msg):
+async def online_com(_,msg):
     global stoponline
     await warn(app,msg,'Always Online')
     while True:
         if stoponline==False:
             online = await app.send_message('me','.')
             await app.delete_messages('me', online.id)
-            await asyncio.sleep(45)
+            await asyncio.sleep(10)
         elif stoponline==True:
             stoponline=False
             break
 @app.on_message(filters.command('offline',prefixes=prefix) & filters.me)
-async def offline(_,msg):
+async def offline_com(_,msg):
     global stoponline
     await warn(app,msg,'Перестаём быть в онлайне!')
     stoponline=True
 
 @app.on_message(filters.command('action',prefixes=prefix) & filters.me)
-async def action(_,msg):
+async def action_com(_,msg):
     chat_id = msg.chat.id
 
     actions = {
@@ -374,13 +405,13 @@ async def action(_,msg):
         await sleep(random.randint(30,60))
 
 @app.on_message(filters.command('update',prefixes=prefix) & filters.me)
-async def update(_,msg):
+async def update_com(_,msg):
     await msg.edit('<code>Обновление юзер бота!</code>')
     check_version(True)
     await warn(app,msg,'Обновление успешно завершено! напишите команду .restart для перезагрузки')
 
 @app.on_message(filters.command('restart',prefixes=prefix) & filters.me)
-async def restart(_,msg):
+async def restart_com(_,msg):
     await warn(app,msg,'Перезагрузка юзер бота! подождите 5-10 секунд')
     if str(platform.system()).lower() == 'linux':
         execl(sys.executable, 'python', __file__, *sys.argv[1:])
@@ -389,7 +420,7 @@ async def restart(_,msg):
     exit()
 
 @app.on_message(filters.command('ню',prefixes=prefix) & filters.me)
-async def ny(_,msg):
+async def ny_com(_,msg):
     try:
         await app.delete_messages(msg.chat.id,msg.id)
         await app.forward_messages('me',msg.chat.id,msg.reply_to_message.id)
@@ -398,7 +429,6 @@ async def ny(_,msg):
 
 @app.on_message(filters.command('quit',prefixes=prefix) & filters.me)
 async def quit_com(_,msg):
-
     await warn(app,msg,'Выключаем юзер бота!')
 
     quit()
