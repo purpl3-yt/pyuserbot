@@ -381,6 +381,10 @@ async def offline_com(_,msg):
     await warn(app,msg,'Перестаём быть в онлайне!')
     stoponline=True
 
+@app.on_message(filters.command('test', prefixes=prefix) & filters.me)
+async def test_com(_,msg):
+    await warn(app,msg,'TEST COMMAND!!!!')
+
 @app.on_message(filters.command('action',prefixes=prefix) & filters.me)
 async def action_com(_,msg):
     chat_id = msg.chat.id
