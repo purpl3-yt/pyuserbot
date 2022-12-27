@@ -1,16 +1,17 @@
-from pyrogram import *
+from PIL import ImageDraw,ImageFont,Image
 from pyrogram.errors import FloodWait
 from download import download
+from os import execl, path
 from asyncio import sleep
-from PIL import ImageDraw,ImageFont,Image
-import io
-import os,shutil,sys
+from pyrogram import *
+import os,shutil,sys,platform
+import math, random
 import configparser
 import requests
-import math, random
 import string
 import socket
 import struct
+import io
 stop=False
 config = configparser.ConfigParser()
 config.read(r'./settings.ini')
@@ -151,12 +152,12 @@ class Meme:
         return self.category
 #For msgs
 async def warn(app,msg,warn: str,alt = False,delay = 3):
-    if alt==False:
+    if not alt:
         await msg.edit('<code>'+str(warn)+'</code>')
         await sleep(delay)
         await msg.delete()
-    elif alt==False:
-        warn_msg = await app.send_msg(msg.chat.id,'<code>'+str(warn)+'</code>')
+    elif alt:
+        warn_msg = await app.send_message(msg.chat.id,'<code>'+str(warn)+'</code>')
         await sleep(delay)
         await warn_msg.delete()
 
@@ -208,7 +209,7 @@ async def disappear(msg,str: str,step: int):#For anim
         await sleep(0.1)
     await msg.delete()
 
-async def ghoul_anim(msg):
+async def count_anim(msg):
     global stop
     gh = 1000
     gh_list = []
