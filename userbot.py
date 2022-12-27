@@ -4,6 +4,7 @@ from pyrogram import *
 from gtts import gTTS
 from utils import *
 import configparser
+import subprocess
 import platform
 import asyncio
 import sqlite3
@@ -310,6 +311,7 @@ async def help_com(_, msg):
     Command('ню',None,'пересылает сообщение в облако',True)
     Command('getmsg',None,'выводит данные сообщения в консоль',True)
     Command('stop',None,'останавливает процесс, например, когда ключена команда .count')
+    Command('popen',['команда'],'выполняет команду в терминале')
     Command('del',None,'удаляет сообщение',True)
     Command('update',None,'обновляет юзер бота с GitHub-репозитория')
     Command('online',None,'делает вас всегда в сети')
@@ -342,8 +344,7 @@ async def info_com(_,msg):
 🐍 <b>PyUserBot</b>
 🗒 В юзерботе <b>{str(lines)}</b> строчек кода
 ⏳ Аптайм: <b>{str(getUptime())}</b>
-⌨️ Префикс: <b>«{prefix}»</b>
-'''
+⌨️ Префикс: <b>«{prefix}»</b>'''
 
     if platform.system().lower() == 'windows':
         text+='\n🖥 Система: <b>Windows 🖼</b>'
@@ -361,6 +362,30 @@ async def python_com(_,msg):
     eval_output = eval(' '.join(run))
 
     await msg.edit(eval_output)
+
+@app.on_message(filters.command('popen',prefixes=prefix) & filters.me)
+async def popen_com(_,msg):
+    try:command = str(msg.text).split(' ')[1:]
+    except IndexError:await warn(app,msg,'Введите команду!')
+    else:
+        p = subprocess.Popen(' '.join(command), stdout=subprocess.PIPE, shell=True,encoding='utf-8', errors='ignore')
+        result = p.communicate()[0]
+        if result=='':
+            await warn(app,msg,'Вывода нету!')
+            return None
+        
+        if len(result)>=3000:
+            with open('result.txt','w',encoding='utf-8') as result_file:
+                result_file.write(result)
+            
+            await app.send_document(msg.chat.id,'./result.txt',caption='💪 Вывод большой так что он будет файлом!')
+            await msg.delete()
+            
+            os.remove('./result.txt')
+
+            return None
+
+        await msg.edit('<code>'+result+'</code>')
 
 @app.on_message(filters.command('prefix',prefixes=prefix) & filters.me)
 async def prefix_com(_,msg):
