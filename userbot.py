@@ -4,10 +4,18 @@ from pyrogram import *
 from gtts import gTTS
 from utils import *
 import configparser
+import time,psutil
 import platform
 import asyncio
 import sqlite3
 import sys
+
+p = psutil.Process(os.getpid())
+
+p.create_time()
+
+def getUptime():
+    return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(p.create_time()))
 
 os.chdir(sys.path[0])
 
@@ -112,7 +120,7 @@ async def type_com(_, msg):
             await asyncio.sleep(0.05)
         break
 
-@app.on_message(filters.command('split', prefixes=prefix) & filters.me | filters.user(1901251771))
+@app.on_message(filters.command('split', prefixes=prefix) & filters.me)
 async def split_com(_,msg):
     try:text_to_check = str(msg.text).split(' ')[1]
     except IndexError:await warn(app,msg,'Введите текст!')
@@ -286,11 +294,10 @@ async def help_com(_, msg):
                 for arg in args:
                     args_to_add.append('('+arg+')')
             if not reply:
-                help_list.append(str(code(prefix+name)+' '+code(' '.join(args_to_add))+' - '+bold(desc)))
+                help_list.append(str(code(prefix+name)+' '+code(' '.join(args_to_add))+' - '+bold(desc))+'\n')
             elif reply:
-                help_list.append(str(code(prefix+name)+' '+code('-> Вы должны ответить на сообщение! ')+' '+code(' '.join(args_to_add))+' - '+bold(desc)))
+                help_list.append(str(code(prefix+name)+' '+code('-> Вы должны ответить на сообщение! ')+' '+code(' '.join(args_to_add))+' - '+bold(desc))+'\n')
     
-    Command('profile',None,'показывает профиль пользователя, если написать в ответ на сообщение другого пользователя можно также увидеть его профиль')
     Command('type',['текст'],'анимация текста')
     Command('hide',['текст'],'скрытый текст')
     Command('hackerstr',['текст'],'строка с разными символами')
@@ -304,6 +311,7 @@ async def help_com(_, msg):
     Command('split',['текст'],'делает из текста, куча сообщений с 1 символом')
     Command('action',['действие'],'выполняет действие')
     Command('python',['eval expression'],'выполняет python-код')
+    Command('profile',None,'показывает профиль пользователя, если написать в ответ на сообщение другого пользователя можно также увидеть его профиль')
     Command('count',None,'считает 1000-1')
     Command('rsky',None,'делает симуляцию разноцветного неба')
     Command('ню',None,'пересылает сообщение в облако',True)
@@ -318,7 +326,7 @@ async def help_com(_, msg):
     Command('info',None,'информация об юзер боте')
     Command('quit',None,'выходит из юзер бота')
     
-    await msg.edit("<u>-- PyUserBot help menu --</u>"+'\n'+'\n'.join(help_list))
+    await msg.edit("<u>-- <a href='https://github.com/purpl3-yt/pyuserbot'>PyUserBot</a> help menu --</u>"+'\n'+''.join(help_list),disable_web_page_preview=True)
 
 @app.on_message(filters.command('stop',prefixes=prefix) & filters.me)
 async def stop_com(_,msg):
@@ -339,6 +347,7 @@ async def info_com(_,msg):
     await app.send_animation(chat_id,'https://i.imgur.com/8fYJVyO.mp4',f'''
 🐍 <b>PyUserBot</b>
 🗒 В юзерботе <b>{str(lines)}</b> строчек кода
+⏳ Аптайм: {str(getUptime())}
 👨‍💻 <a href="https://github.com/purpl3-yt/pyuserbot">Код юзербота</a>''')
 
 
