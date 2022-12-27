@@ -10,7 +10,7 @@ import sqlite3
 import sys
 
 def getUptime():
-    return datetime.now().strftime('%m/%d/%Y - %H:%M')
+    return datetime.now().strftime('%d/%m/%Y - %H:%M')
 
 os.chdir(sys.path[0])
 
@@ -26,15 +26,15 @@ config = configparser.ConfigParser()
 if not path.isfile('./settings.ini'):
     with open('settings.ini','w') as cfg:
         cfg.write('''
-    [main]
-    api_id = ???
-    api_hash = ???
-    prefix = .
-    htext = f
-    hide = f
-    autoreac = f
-    tts = f
-    font = f
+[main]
+api_id = ???
+api_hash = ???
+prefix = .
+htext = f
+hide = f
+autoreac = f
+tts = f
+font = f
     ''')
     print('Created config!\nFill api_id and api_hash')
     sys.exit()
