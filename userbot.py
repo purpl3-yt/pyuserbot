@@ -1,7 +1,7 @@
 from pyrogram import errors,enums
 from datetime import datetime
-from os import execl, path
 from pyrogram import *
+from gtts import gTTS
 from utils import *
 import configparser
 import platform
@@ -11,36 +11,36 @@ import sys
 
 os.chdir(sys.path[0])
 
+def restart():
+    if str(platform.system()).lower() == 'linux':
+        execl(sys.executable, 'python', __file__, *sys.argv[1:])
+    elif str(platform.system()).lower() == 'windows':
+        execl(sys.executable, 'python', __file__, *sys.argv[1:])
+    exit()
+
 stoponline=False
 config = configparser.ConfigParser()
 if not path.isfile('./settings.ini'):
-    newconfig = open('settings.ini', 'w')
-    newconfig.write('[main]\napi_id = 123123\napi_hash = abcdefg1234\n')
-    newconfig.close()
-    print('Created new empty config, please check root dir')
+    with open('settings.ini','w') as cfg:
+        cfg.write('''
+    [main]
+    api_id = ???
+    api_hash = ???
+    prefix = .
+    htext = f
+    hide = f
+    autoreac = f
+    tts = f
+    jac = f
+    font = f
+    ''')
+    print('Created config!\nFill api_id and api_hash')
     sys.exit()
+
 config.read(r'./settings.ini')
 api_id = config.get('main','api_id')
 api_hash = config.get('main','api_hash')
 app = Client('my_account',api_id=api_id, api_hash=api_hash)
-
-if not os.path.isfile('./settings.ini'):
-    with open('settings.ini','w') as cfg:
-        cfg.write('''
-[main]
-api_id = ???
-api_hash = ???
-prefix = .
-htext = f
-hide = f
-autoreac = f
-tts = f
-jac = f
-font = f
-''')
-    print('Created config!\nFill api_id and api_hash')
-
-prefix = str(config.get('main','prefix'))
 
 #Settings
 try:
@@ -49,22 +49,17 @@ try:
     autoreac = Setting('autoreac',config.get('main','autoreac'))
     ttsset = Setting('tts',config.get('main','tts'))
     jacset = Setting('jac',config.get('main','jac'))
+    prefix = str(config.get('main','prefix'))
     #Settings dict
     settings_list = {'htext':htext,'hide':hideset,'autoreac':autoreac,'tts':ttsset,'jac':jacset}
 except configparser.NoOptionError as e:
-    from pathlib import Path
     option = str(e)
     option_start = int(str(option).find("No option '"))+len("No option '")
     option_end = int(str(option).find("' in section"))
     config.set('main',str(option[option_start:option_end]), 'f')
     config.write(open('settings.ini','w'))
     print('Please wait we are creating settings for the config file')
-    if str(platform.system()).lower() == 'linux':
-        execl(sys.executable, 'python', __file__, *sys.argv[1:])
-        exit()
-    elif str(platform.system()).lower() == 'windows':
-        execl(sys.executable, 'python', __file__, *sys.argv[1:])
-        exit()
+    restart()
 stop=False
 #System
 @app.on_message(filters.command('set', prefixes=prefix) & filters.me)
@@ -226,9 +221,9 @@ async def rand_com(_,msg):
     except ValueError:
         await warn(app,msg,'Второе число должно быть не больше первого.',False)
 
-@app.on_message(filters.command('ghoul',prefixes=prefix) & filters.me)
-async def ghoul_com(_,msg):
-    await ghoul_anim(msg)
+@app.on_message(filters.command('count',prefixes=prefix) & filters.me)
+async def count_com(_,msg):
+    await count_anim(msg)
 
 @app.on_message(filters.command('rsky',prefixes=prefix) & filters.me)
 async def rsky_com(_,msg):
@@ -269,39 +264,62 @@ async def math_com(_,msg):
 @app.on_message(filters.command('help', prefixes=prefix) & filters.me)
 async def help_com(_, msg):
     settings = [str(i[0])+' ' for i in settings_list.items()]
-    await msg.edit(f'''<code>
-Доступные команды:
-.set (настройка) (статус) - Меняет настройки
-Настройки: {' '.join(settings)}
-.profile - Показывает профиль пользователя, если написать в ответ на сообщение другого пользователя можно также увидеть его профиль
-.info - Информация об юзер боте
-.type (текст) - Анимация текста
-.hide (текст) - Скрытый текст
-.hackerstr (текст) - Строка с разными символами
-.hack (пользователь) - "Взламывает" пользователя
-.spam (количество) (текст) - спамит сообщениями
-.tts (в какой язык [en,ru,etc]) (текст) - отправляет голосовое сообщение с текстом
-.rand (первое число) (второе число) - генерирует рандомное число
-.math (первое число) (оператор [+,-,/]) (второе число)
-.ghoul - считает 1000-1 #deadinside
-.rsky - Делает разноцветное небо
-.jac (текст) - Цитата Жака Фреско
-.meme (мем) - отправляет мем
-.like (лимит) - лайкает сообщения
-.split (текст) - делает из текста, куча сообщений с 1 символом
-.stop - останавливает процесс, например, когда ключена команда .ghoul
-.del -> Вы должны ответить на сообщение! - удаляет сообщение
-.getmsg -> Вы должны ответить на сообщение! - выводит данные сообщения в консоль
-.ню -> Вы должны ответить на сообщение! - пересылает сообщение в облако
-.python (eval expression) - выполняет python-код
-.prefix (новый префикс) - меняет префикс
-.action (действие) - выполняет действие 
-.online - Делает вас всегда в сети
-.offline - Останавливает команду .online
-.update - Обновляет юзер бота с GitHub-репозитория
-.restart - Перезапускает юзер бота
-.quit - выходит из юзер бота</code>
-''')
+
+    code = lambda text : '<code>'+text+'</code>'
+    bold = lambda text : '<bold>'+text+'</bold>'
+
+    help_list = []
+    class Command:
+
+        def __init__(self,name,args,desc,reply=False):
+            self.name = name
+            self.args = args
+            self.desc = desc
+            self.reply = reply
+            
+            args_to_add = []
+            
+            
+            if args==None:
+                args_to_add = []
+            elif args!=None:
+                for arg in args:
+                    args_to_add.append('('+arg+')')
+            if not reply:
+                help_list.append(str(code(prefix+name)+' '+code(' '.join(args_to_add))+' - '+code(desc)))
+            elif reply:
+                help_list.append(str(code(prefix+name)+' '+code('-> Вы должны ответить на сообщение! ')+' '+code(' '.join(args_to_add))+' - '+code(desc)))
+    Command('profile',None,'показывает профиль пользователя, если написать в ответ на сообщение другого пользовЫателя можно также увидеть его профиль')
+    Command('type',['текст'],'анимация текста')
+    Command('hide',['текст'],'скрытый текст')
+    Command('hackerstr',['текст'],'строка с разными символами')
+    Command('hack',['пользователь'],'"взламывает" пользователя')
+    Command('spam',['количество','текст'],'спамит сообщениями')
+    Command('tts',['в какой язык [en,ru,etc]','текст'],'отправляет голосовое сообщение с текстом')
+    Command('rand',['первое число','второе число'],'генерирует рандомное число')
+    Command('math',['первое число','оператор [+,-,/]','второе число'],'математика')
+    Command('count',None,'считает 1000-1')
+    Command('rsky',None,'делает симуляцию разноцветного неба')
+    Command('jac',['текст'],'цитата Жака Фреско')
+    Command('meme',['мем'],'отправляет мем')
+    Command('like',['лимит'],'лайкает сообщения')
+    Command('split',['текст'],'делает из текста, куча сообщений с 1 символом')
+    Command('ню',None,'пересылает сообщение в облако',True)
+    Command('action',['действие'],'выполняет действие')
+    Command('python',['eval expression'],'выполняет python-код')
+    Command('getmsg',None,'выводит данные сообщения в консоль',True)
+    Command('stop',None,'останавливает процесс, например, когда ключена команда .count')
+    Command('del',None,'удаляет сообщение',True)
+    Command('update',None,'обновляет юзер бота с GitHub-репозитория')
+    Command('online',None,'делает вас всегда в сети')
+    Command('offline',None,'останавливает команду .online')
+    Command('prefix',['новый префикс'],'меняет префикс')
+    Command('restart',None,'перезапускает юзер бота')
+    Command('info',None,'информация об юзер боте')
+    Command('quit',None,'выходит из юзер бота')
+    print(help_list)
+
+    await msg.edit(bold("-- PyUserBot's help menu --")+'\n'+'\n'.join(help_list))
 @app.on_message(filters.command('stop',prefixes=prefix) & filters.me)
 async def stop_com(_,msg):
     changestop(True)
@@ -343,7 +361,7 @@ async def prefix_com(_,msg):
         config.set('main','prefix',str(new_prefix))
         config.write(open('settings.ini','w'))
 
-        await warn(app,msg,'Сохранен новый префикс, перезапускаюсь...')
+        await warn(app,msg,'Сохранён новый префикс, перезапускаюсь...')
 
         if str(platform.system()).lower() == 'linux':
             execl(sys.executable, 'python', __file__, *sys.argv[1:])
@@ -378,7 +396,7 @@ async def online_com(_,msg):
 @app.on_message(filters.command('offline',prefixes=prefix) & filters.me)
 async def offline_com(_,msg):
     global stoponline
-    await warn(app,msg,'Перестаём быть в онлайне!')
+    await warn(app,msg,'Постоянный онлайн выключен.')
     stoponline=True
 
 @app.on_message(filters.command('test', prefixes=prefix) & filters.me)
@@ -417,11 +435,8 @@ async def update_com(_,msg):
 @app.on_message(filters.command('restart',prefixes=prefix) & filters.me)
 async def restart_com(_,msg):
     await warn(app,msg,'Перезагружаюсь, подождите пару секунд...')
-    if str(platform.system()).lower() == 'linux':
-        execl(sys.executable, 'python', __file__, *sys.argv[1:])
-    elif str(platform.system()).lower() == 'windows':
-        execl(sys.executable, 'python', __file__, *sys.argv[1:])
-    exit()
+
+    restart()
 
 @app.on_message(filters.command('ню',prefixes=prefix) & filters.me)
 async def ny_com(_,msg):
@@ -454,7 +469,6 @@ async def write_self(_,msg):
                 await msg.edit('||'+msg.text[4:]+'||')
             elif str(ttsset.getstatus()).lower()=='t':
                 if msg.text!=None:
-                    from gtts import gTTS
                     text = str(msg.text).split(' ')[0:]
                     voicetts = gTTS(str(' '.join(text)),lang='ru')
                     await msg.delete()        
@@ -472,7 +486,8 @@ def run():#Run userbot
     print(f'By: https://t.me/PLNT_YT\nYour system is: {str(platform.system())}\nStarted at: '+datetime.now().strftime('%m/%d/%Y - %H:%M'))
     try:
         app.run()
-    except sqlite3.OperationalError as e:
+
+    except sqlite3.OperationalError:
         if str(platform.system()).lower() == 'linux':
             print('\n\nYou have sqlite3 error!\nEnter: "fuser my_account.session"\nAnd check number at end\nAnd type: "kill -9 <number in command fuser>"\n\n')
         elif str(platform.system()).lower() == 'windows':
