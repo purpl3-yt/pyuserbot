@@ -1,10 +1,9 @@
-from PIL import ImageDraw,ImageFont,Image
 from pyrogram.errors import FloodWait
 from download import download
 from os import execl, path
 from asyncio import sleep
 from pyrogram import *
-import os,shutil,sys,platform
+import os,shutil,sys
 import math, random
 import configparser
 import requests
@@ -151,51 +150,58 @@ class Meme:
     def getcategory(self):
         return self.category
 #For msgs
-async def warn(app,msg,warn: str,alt = False,delay = 3):
+async def warn(app,msg,warn: str,alt = False,delay = 3, mode = 'error'):
     if not alt:
-        await msg.edit('<code>'+str(warn)+'</code>')
+        if mode=='error':
+            await msg.edit('🚫 '+'<b>'+str(warn)+'</b>')
+        elif mode=='info':
+            await msg.edit('ℹ️ '+'<b>'+str(warn)+'</b>')
         await sleep(delay)
         await msg.delete()
     elif alt:
-        warn_msg = await app.send_message(msg.chat.id,'<code>'+str(warn)+'</code>')
+        if mode=='error':
+            warn_msg = await app.send_message(msg.chat.id,'🚫 '+'<b>'+str(warn)+'</b>')
+        elif mode=='info':
+            warn_msg = await app.send_message(msg.chat.id,'ℹ️ '+'<b>'+str(warn)+'</b>')
         await sleep(delay)
         await warn_msg.delete()
 
 async def getprofile(msg):
     with open('version.txt') as f:
         version = f.read()
+
+    convert_bool = {True:'Да',False:'Нет'}
+
     git_ver = requests.get('https://raw.githubusercontent.com/purpl3-yt/pyuserbot/master/version.txt')
     github_version = git_ver.text
     if msg.reply_to_message==None:
         name = msg.from_user.username
-        is_premium = msg.from_user.is_premium
-        is_scam = msg.from_user.is_scam
-        is_bot = msg.from_user.is_bot
+        is_premium = convert_bool[msg.from_user.is_premium]
+        is_scam = convert_bool[msg.from_user.is_scam]
+        is_bot = convert_bool[msg.from_user.is_bot]
         await msg.edit(f'''
-Имя: {name}
-Номер телефона: ||куда мы лезем боже||
-С премиумом: {is_premium}
-Скам: {is_scam}
-Бот: {is_bot}
-Версия юзер бота: {version}
-Версия юзер бота на гитхаб: {github_version}
-<a href='https://github.com/purpl3-yt/pyuserbot'>Репозиторий</a>''',disable_web_page_preview=True)
+✏️ Имя: <b>{name}</b>
+⭐️ С премиумом: {is_premium}</b>
+🥸 Скам: <b>{is_scam}</b>
+🤖 Бот: <b>{is_bot}</b>
+🗒 Версия юзер бота: <code>{version}</code>
+🗒 Версия юзер бота на гитхаб: <code>{github_version}</code>
+🌐 <a href='https://github.com/purpl3-yt/pyuserbot'>Репозиторий</a>''',disable_web_page_preview=True)
 
     else:
         first_name = msg.reply_to_message.from_user.first_name
         last_name = msg.reply_to_message.from_user.last_name
         name = msg.reply_to_message.from_user.username
-        is_premium = msg.reply_to_message.from_user.is_premium
-        is_scam = msg.reply_to_message.from_user.is_scam
-        is_bot = msg.reply_to_message.from_user.is_bot
+        is_premium = convert_bool[msg.reply_to_message.from_user.is_premium]
+        is_scam = convert_bool[msg.reply_to_message.from_user.is_scam]
+        is_bot = convert_bool[msg.reply_to_message.from_user.is_bot]
         await msg.edit(f'''
-Первое имя: {first_name}
-Второе имя: {last_name}
-Тег: @{name}
-Номер телефона: ||куда мы лезем боже||
-С премиумом: {is_premium}
-Скам: {is_scam}
-Бот: {is_bot}''')
+✏️ Первое имя: <b>{first_name}</b>
+✏️ Второе имя: <b>{last_name}</b>
+#️⃣ Тег: @{name}
+⭐️ С премиумом: <b>{is_premium}</b>
+🥸 Скам: <b>{is_scam}</b>
+🤖 Бот: <b>{is_bot}</b>''')
 
 async def disappear(msg,str: str,step: int):#For anim
     steps = []
@@ -258,42 +264,7 @@ async def umath(msg,num1,oper,num2,app=None):
         elif oper=='*':await msg.edit(int(num1)*int(num2))
     except ValueError:
         await warn(app,msg,'Введите числа а не буквы!')
-    
-async def jac_img(app,msg,setting=False):
-    ufr = requests.get('https://github.com/Sad0ff/modules-ftg/raw/master/open-sans.ttf')
-    f = ufr.content
-    pic = requests.get('https://www.meme-arsenal.com/memes/54c7ee322f4b0ae586ec96195a59a073.jpg')
-    pic.raw.decode_content = True
-    img = Image.open(io.BytesIO(pic.content)).convert('RGB')
 
-    W, H = img.size
-    #txt = txt.replace('\n', '𓃐')
-    if setting==False:
-        if msg.reply_to_message!=None:
-            text = '\n'.join(str(msg.reply_to_message.text).split(' ')[0:])
-            t = text + '\n'
-        else:
-            text = '\n'.join(str(msg.text).split(' ')[1:])
-            t = text + '\n'
-    else:
-        text = '\n'.join(str(msg.text).split(' ')[0:])
-        t = text + '\n'
-    await msg.delete()
-    #t = t.replace('𓃐','\n')
-    draw = ImageDraw.Draw(img)
-    font = ImageFont.truetype(io.BytesIO(f), 32, encoding='UTF-8')
-    w, h = draw.multiline_textsize(t, font=font)
-    imtext = Image.new('RGBA', (w+10, h+10), (0, 0,0,0))
-    draw = ImageDraw.Draw(imtext)
-    draw.multiline_text((10, 10),t,(0,0,0),font=font, align='left')
-    imtext.thumbnail((339, 181))
-    w, h = 339, 181
-    img.paste(imtext, (10,10), imtext)
-    out = io.BytesIO()
-    out.name = 'shak.jpg'
-    img.save(out)
-    out.seek(0)
-    await app.send_photo(msg.chat.id,out)
 #Memes
 meme_uno = Meme('Uno','Games',['CAACAgQAAxkBAAL2wWNZDQ9KquGC7PDmBeJz8zNUIZFAAAIFAAPVcf0xIvIu5opGXfMeBA','CAACAgQAAxkBAAL2w2NZDWTAis0LomAb4mndQmK5ZXb5AAIEAAPVcf0xXSRFIA9A-v4eBA','CAACAgQAAxkBAAL2xGNZDWSiIjvV-G3ItXZBB4TvBUzZAAIDAAPVcf0xtgnebiE3rAEeBA','CAACAgQAAxkBAAL2xWNZDWQuQdQsB3PkdZCsLb3hqHanAAICAAPVcf0x1qyFAAFPPAsOHgQ'])
 meme_like = Meme('Like','Emote',['CAACAgIAAxkBAAL2_WNZDrV6Zgc4pmMJTdoJC-8gPXEdAAKPGAACh-4hSbfyhIqPrJeUHgQ','CAACAgIAAxkBAAL2_mNZDrvyu-25Jm3VDERwXQthLuyRAAI0AAOROZwcpUsVS-iiqS8eBA'])
