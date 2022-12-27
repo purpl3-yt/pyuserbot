@@ -5,8 +5,7 @@
 1) Install python: https://www.python.org/ftp/python/3.8.10/python-3.8.10-amd64.exe
 2) Download userbot: https://github.com/purpl3-yt/pyuserbot/archive/refs/heads/master.zip
 3) Go to file settings.ini and change api_id and api_hash, here is the instruction in Russian: https://teletype.in/@lavhost/telegram-api
-4) Run the [start.bat](https://github.com/purpl3-yt/pyuserbot/blob/master/start.bat) file
-5) Or you can run main.py file with python
+5) Run main.py file with python
 # Install on Linux
 1) Install python, run terminal and type: ```apt install python3.8```
 2) Download userbot: https://github.com/purpl3-yt/pyuserbot/archive/refs/heads/master.zip
