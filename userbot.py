@@ -4,18 +4,13 @@ from pyrogram import *
 from gtts import gTTS
 from utils import *
 import configparser
-import time,psutil
 import platform
 import asyncio
 import sqlite3
 import sys
 
-p = psutil.Process(os.getpid())
-
-p.create_time()
-
 def getUptime():
-    return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(p.create_time()))
+    return datetime.now().strftime('%m/%d/%Y - %H:%M')
 
 os.chdir(sys.path[0])
 
@@ -39,7 +34,6 @@ if not path.isfile('./settings.ini'):
     hide = f
     autoreac = f
     tts = f
-    jac = f
     font = f
     ''')
     print('Created config!\nFill api_id and api_hash')
@@ -56,10 +50,9 @@ try:
     hideset = Setting('hide',config.get('main','hide'))
     autoreac = Setting('autoreac',config.get('main','autoreac'))
     ttsset = Setting('tts',config.get('main','tts'))
-    jacset = Setting('jac',config.get('main','jac'))
     prefix = str(config.get('main','prefix'))
     #Settings dict
-    settings_list = {'htext':htext,'hide':hideset,'autoreac':autoreac,'tts':ttsset,'jac':jacset}
+    settings_list = {'htext':htext,'hide':hideset,'autoreac':autoreac,'tts':ttsset}
 except configparser.NoOptionError as e:
     option = str(e)
     option_start = int(str(option).find("No option '"))+len("No option '")
@@ -326,7 +319,7 @@ async def help_com(_, msg):
     Command('info',None,'информация об юзер боте')
     Command('quit',None,'выходит из юзер бота')
     
-    await msg.edit("<u>-- <a href='https://github.com/purpl3-yt/pyuserbot'>PyUserBot</a> help menu --</u>"+'\n'+''.join(help_list),disable_web_page_preview=True)
+    await msg.edit("<u>-- <a href='https://github.com/purpl3-yt/pyuserbot'>PyUserBot's</a> help menu --</u>"+'\n'+''.join(help_list),disable_web_page_preview=True)
 
 @app.on_message(filters.command('stop',prefixes=prefix) & filters.me)
 async def stop_com(_,msg):
@@ -347,7 +340,8 @@ async def info_com(_,msg):
     await app.send_animation(chat_id,'https://i.imgur.com/8fYJVyO.mp4',f'''
 🐍 <b>PyUserBot</b>
 🗒 В юзерботе <b>{str(lines)}</b> строчек кода
-⏳ Аптайм: {str(getUptime())}
+⏳ Аптайм: <b>{str(getUptime())}</b>
+⌨️ Префикс: <b>{prefix}</b>
 👨‍💻 <a href="https://github.com/purpl3-yt/pyuserbot">Код юзербота</a>''')
 
 
@@ -366,6 +360,16 @@ async def prefix_com(_,msg):
         await warn(app,msg,'Введите новый префикс.')
     
     else:
+        
+        for s in [string.ascii_letters,string.digits,'(',')','=','_']:
+            if new_prefix in s:
+                await warn(app,msg,'Такой префикс поставить нельзя!')
+                return None
+
+        if len(new_prefix)>1:
+            await warn(app,msg,'Префикс должен быть не больше 1 символа!')
+            return None
+
         prefix = str(new_prefix)
 
         config.set('main','prefix',str(new_prefix))
@@ -435,7 +439,7 @@ async def action_com(_,msg):
 
 @app.on_message(filters.command('update',prefixes=prefix) & filters.me)
 async def update_com(_,msg):
-    await msg.edit('<code>Обновляюсь...</code>',mode='info')
+    await msg.edit('<code>Обновляюсь...</code>')
     check_version(True)
     await warn(app,msg,'Обновление прошло успешно, напишите .restart для перезагрузки.',mode='info')
 
@@ -488,7 +492,7 @@ async def write_self(_,msg):
                 await app.send_reaction(msg.chat.id, msg.id, choice(random_emoji))
 def run():#Run userbot
     print(getlogo(),end='')
-    print(f'By: https://t.me/PLNT_YT\nYour system is: {str(platform.system())}\nStarted at: '+datetime.now().strftime('%m/%d/%Y - %H:%M'))
+    print(f'By: https://t.me/PLNT_YT\nYour system is: {str(platform.system())}\nStarted at: '+getUptime())
     try:
         app.run()
 
