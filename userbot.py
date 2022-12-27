@@ -337,12 +337,22 @@ async def info_com(_,msg):
             data = py_file.read()
             data = data.split('\n')
             lines+=len(data)
-    await app.send_animation(chat_id,'https://i.imgur.com/8fYJVyO.mp4',f'''
+
+    text = f'''
 🐍 <b>PyUserBot</b>
 🗒 В юзерботе <b>{str(lines)}</b> строчек кода
 ⏳ Аптайм: <b>{str(getUptime())}</b>
-⌨️ Префикс: <b>{prefix}</b>
-👨‍💻 <a href="https://github.com/purpl3-yt/pyuserbot">Код юзербота</a>''')
+⌨️ Префикс: <b>«{prefix}»</b>
+'''
+
+    if platform.system().lower() == 'windows':
+        text+='\n🖥 Система: <b>Windows 🖼</b>'
+    elif platform.system().lower() == 'linux':
+        text+='\n🖥 Система: <b>Linux 🐧</b>'
+
+    text+='\n👨‍💻 <a href="https://github.com/purpl3-yt/pyuserbot">Код юзербота</a>'
+
+    await app.send_animation(chat_id,'https://i.imgur.com/8fYJVyO.mp4',text)
 
 
 @app.on_message(filters.command('python',prefixes=prefix) & filters.me)
