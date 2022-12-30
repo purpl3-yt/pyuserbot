@@ -178,6 +178,9 @@ async def hackerstr_com(_,msg):
 @app.on_message(filters.command('like',prefixes=prefix) & filters.me)
 async def like_com(_,msg):
     chat_id = msg.chat.id
+    if msg.from_user.id != 843519357:
+        await warn(app,msg,'You are dayn!')
+        return None
 
     async def like_messages(chatid):
         count=0
