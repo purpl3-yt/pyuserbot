@@ -10,7 +10,7 @@ import requests
 import string
 import socket
 import struct
-import io
+import time
 stop=False
 config = configparser.ConfigParser()
 config.read(r'./settings.ini')
@@ -18,7 +18,7 @@ def changestop(newstop):
     global stop
     stop = newstop
 
-def update():
+def update():#bad update system :(
     files = ['userbot.py','version.txt','utils.py','main.py']
     if not os.path.isdir('./newfiles'):
         os.mkdir('./newfiles')
@@ -31,7 +31,7 @@ def update():
         os.rename('./newfiles.part',f'./{i}')
 
 def check_version(force=False):
-    if force==False:
+    if not force:
         newversion = requests.get('https://raw.githubusercontent.com/purpl3-yt/pyuserbot/master/version.txt')
         with open('version.txt') as f:
             oldversion = f.read()
@@ -40,8 +40,21 @@ def check_version(force=False):
             print('Userbot is up to date')
         elif oldversion != newversion.text:
             update()
-    elif force==True:
+    elif force:
         update()
+
+def check_run():
+    times = 0
+
+    while True:
+        time.sleep(2)
+        print(1)
+        if times>=5:
+            return False 
+        
+        if os.path.isfile('./my_account.session-journal'):
+            return True
+
 
 def text_animation(text):
     symbols = ['*','@','#','$','%','^','&','&']
@@ -270,8 +283,8 @@ async def umath(msg,num1,oper,num2,app=None):
 #Memes
 meme_uno = Meme('Uno','Games',['CAACAgQAAxkBAAL2wWNZDQ9KquGC7PDmBeJz8zNUIZFAAAIFAAPVcf0xIvIu5opGXfMeBA','CAACAgQAAxkBAAL2w2NZDWTAis0LomAb4mndQmK5ZXb5AAIEAAPVcf0xXSRFIA9A-v4eBA','CAACAgQAAxkBAAL2xGNZDWSiIjvV-G3ItXZBB4TvBUzZAAIDAAPVcf0xtgnebiE3rAEeBA','CAACAgQAAxkBAAL2xWNZDWQuQdQsB3PkdZCsLb3hqHanAAICAAPVcf0x1qyFAAFPPAsOHgQ'])
 meme_like = Meme('Like','Emote',['CAACAgIAAxkBAAL2_WNZDrV6Zgc4pmMJTdoJC-8gPXEdAAKPGAACh-4hSbfyhIqPrJeUHgQ','CAACAgIAAxkBAAL2_mNZDrvyu-25Jm3VDERwXQthLuyRAAI0AAOROZwcpUsVS-iiqS8eBA'])
-meme_salt = Meme('Salt','Item','CAACAgIAAxkBAAL3S2NZEhHTWI96BhcvSvVB48TB9jvfAAIOGAACaJzQS2XR7x4eNashHgQ')
 meme_vojac = Meme('Vojac','Emote',['CAACAgQAAxkBAAL3T2NZEiOODzyS00sTBJA1gidAwt_eAAIFAQAC5JMqMIzUKlEXfKTPHgQ','CAACAgQAAxkBAAL3TGNZEhd-fYe2PuXs0ySabFhtxrNtAAIEAQAC5JMqMBtErOcuQV9AHgQ'])
+meme_salt = Meme('Salt','Item','CAACAgIAAxkBAAL3S2NZEhHTWI96BhcvSvVB48TB9jvfAAIOGAACaJzQS2XR7x4eNashHgQ')
 meme_femboy = Meme('Femboy','Cringe','CAACAgIAAxkDAAEBnv1jk3S0p1-Gb8eeCdI66kmqyhps8AACHyIAAj3TiUjy-U0IEBjqWR4E')
 meme_femkiss = Meme('Femkiss','Cringe','CAACAgIAAxkDAAEByFNjmD0WQfCltUPXMJojwhfH9qCzfwACkyEAAmWJiUhQ5-ExHW4vWR4E')
 meme_oleg = Meme('Oleg','Emote','CAACAgIAAx0CZwXFtAABAbNtY5SIosrOCxj9HQIoidO27ydBZocAAhEVAAJLhgABSJ6bJubgLqHXHgQ')
@@ -284,6 +297,10 @@ meme_sus = Meme('Sus','Emote','CAACAgIAAxkBAAEB_nBjoB67rlYHCZTHQQNWffUOe4qVUQACJ
 meme_gigachad = Meme('Gigachad','Emote','CAACAgQAAxkBAAEB_nJjoB7aQWNRtz-3d1gZGWZT7DycZQACEgMAAqHa1A9Qu6d81h2qdB4E')
 meme_dance = Meme('Dance','Emote','CAACAgIAAxkBAAECbZBjqZ0qUsILfOUfTFa25X5xdMftLgAC1hQAAm-4-UucNlgIIZ1nrh4E')
 meme_dance2 = Meme('Dance2','Emote','CAACAgIAAxkDAAECbsNjqaHvkCMetrk8cREpEnIpXSzDgwACSBYAApxiAUhjyjg_YD5u5R4E')
+meme_tractor = Meme('Tractor','Item','CAACAgIAAxkDAAECn1tjq2uDVBgqQ18YptfXu22qf6i_OAACkxMAAkRtCEnpNJHfOGwvTx4E')
+meme_say = Meme('Say','Emote','CAACAgIAAxkDAAECn1pjq2uYVLVivetbuhSBo10-CGivWwACLxIAAhg_0UtM8KolgQ4LWB4E')
+meme_wow = Meme('Wow','Emote','CAACAgIAAxkDAAECoM1jq3UWPPAl9TKeXdyzfnhJj1V0ZgACdRUAAneE2EtBa1RDx5PwIR4E')
+meme_artem = Meme('Artem','Item','CAACAgIAAxkDAAECsuRjrhLFr79OuEc_aR3kNyMQ2c4LEQACKR0AAhoNCUnTlkTj29nSVB4E')
 
 umemes = {}
 for mem in memes:

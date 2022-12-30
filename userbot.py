@@ -1,6 +1,5 @@
-from pyrogram import errors,enums
+from pyrogram import errors, enums, Client, idle
 from datetime import datetime
-from pyrogram import *
 from gtts import gTTS
 from utils import *
 import configparser
@@ -8,6 +7,8 @@ import subprocess
 import platform
 import asyncio
 import sqlite3
+import asyncio
+import psutil
 import sys
 
 def getUptime():
@@ -62,7 +63,10 @@ except configparser.NoOptionError as e:
     config.write(open('settings.ini','w'))
     print('Please wait we are creating settings for the config file')
     restart()
+
 stop=False
+love_words = str(requests.get('https://pastebin.com/raw/ZSk4qP1d').text).split('\n')
+
 #System
 @app.on_message(filters.command('set', prefixes=prefix) & filters.me)
 async def set(_, msg):
@@ -139,6 +143,23 @@ async def split_com(_,msg):
 
     await send_frame()
 
+@app.on_message(filters.command('len',prefixes=prefix) & filters.me)
+async def len_com(_,msg):
+    async def send():
+        len_text = msg.text
+        if msg.reply_to_message != None:
+            len_text = msg.reply_to_message.text
+        await msg.edit('<b>Длина текста: </b><code>'+str(len(' '.join(str(len_text).split(' ')[1:])))+'</code> <b>символов!</b>')
+    
+    if msg.reply_to_message != None:
+        await send()
+        return None
+        
+    try:text_to_check = str(msg.text).split(' ')[1]
+    except IndexError:
+        await warn(app,msg,'Введите текст!');return None
+    else:
+        await send()
 @app.on_message(filters.command('hackerstr', prefixes=prefix) & filters.me)
 async def hackerstr_com(_,msg):
     try:
@@ -210,7 +231,7 @@ async def hack_com(_, msg):
     for i in range(0,100+1,4):
         await msg.edit(str(i)+'%')
     await asyncio.sleep(0.6)
-    await msg.edit(f'{user} успешно взломан!\nАйпи: {getrandomip()}\nГеолокация: {getrandomgeo()}\nHwid: {getrandomhwid()}')
+    await msg.edit(f'{user} успешно взломан!\nАйпи: {getrandomip()}\nГеолокация: {getrandomgeo()}\nHWID: {getrandomhwid()}')
 
 @app.on_message(filters.command('rand',prefixes=prefix) & filters.me)
 async def rand_com(_,msg):
@@ -303,6 +324,7 @@ async def help_com(_, msg):
     Command('meme',['мем'],'отправляет мем')
     Command('like',['лимит'],'лайкает сообщения')
     Command('split',['текст'],'делает из текста, куча сообщений с 1 символом')
+    Command('len',['текст'],'выводит длину текста (также вы можете ответить на сообщение)')
     Command('action',['действие'],'выполняет действие')
     Command('python',['eval expression'],'выполняет python-код')
     Command('profile',None,'показывает профиль пользователя, если написать в ответ на сообщение другого пользователя можно также увидеть его профиль')
@@ -344,14 +366,14 @@ async def info_com(_,msg):
 🐍 <b>PyUserBot</b>
 🗒 В юзерботе <b>{str(lines)}</b> строчек кода
 ⏳ Аптайм: <b>{str(getUptime())}</b>
-⌨️ Префикс: <b>«{prefix}»</b>'''
+⌨️ Префикс: <b>«</b><code>{prefix}</code><b>»</b>'''
 
     if platform.system().lower() == 'windows':
         text+='\n🖥 Система: <b>Windows 🖼</b>'
     elif platform.system().lower() == 'linux':
         text+='\n🖥 Система: <b>Linux 🐧</b>'
 
-    text+='\n👨‍💻 <a href="https://github.com/purpl3-yt/pyuserbot">Код юзербота</a>'
+    text+='\n⚙️ <a href="https://github.com/purpl3-yt/pyuserbot">Код юзербота</a>'
 
     await app.send_animation(chat_id,'https://i.imgur.com/8fYJVyO.mp4',text)
 
@@ -389,6 +411,7 @@ async def popen_com(_,msg):
 
 @app.on_message(filters.command('prefix',prefixes=prefix) & filters.me)
 async def prefix_com(_,msg):
+    global prefix
     try:new_prefix = str(msg.text).split(' ')[1]
     
     except IndexError:
@@ -412,11 +435,7 @@ async def prefix_com(_,msg):
 
         await warn(app,msg,'Сохранён новый префикс, перезапускаюсь...',mode='info')
 
-        if str(platform.system()).lower() == 'linux':
-            execl(sys.executable, 'python', __file__, *sys.argv[1:])
-        elif str(platform.system()).lower() == 'windows':
-            execl(sys.executable, 'python', __file__, *sys.argv[1:])
-        exit()
+        restart()
 
 @app.on_message(filters.command('del',prefixes=prefix) & filters.me)
 async def delete_com(_,msg):
@@ -471,6 +490,17 @@ async def action_com(_,msg):
         await app.send_chat_action(chat_id,actions[mode])
 
         await sleep(random.randint(30,60))
+
+@app.on_message(filters.command('love_word',prefixes=prefix) & filters.me)#idea by my gf, zen1tliks
+async def love_com(_,msg):
+    try:gender = str(msg.text).split(' ')[1]
+    except IndexError:await warn(app,msg,'Выберите пол, [m,w]!');return None
+    else:
+        if not gender in ['m','w']:
+            await warn(app,msg,'Выберите пол, [m,w]!');return None
+        else:
+            if gender == 'm':
+                await msg.edit(random.choice(love_words))
 
 @app.on_message(filters.command('update',prefixes=prefix) & filters.me)
 async def update_com(_,msg):
@@ -527,13 +557,27 @@ async def write_self(_,msg):
                 await app.send_reaction(msg.chat.id, msg.id, choice(random_emoji))
 def run():#Run userbot
     print(getlogo(),end='')
-    print(f'By: https://t.me/PLNT_YT\nYour system is: {str(platform.system())}\nStarted at: '+getUptime())
+    print(f'By: https://t.me/PLNT_YT with ❤️\nYour system is: {str(platform.system())}\nStarted at: '+getUptime()+' ⏳'+'\nGlory to Ukraine!')
     try:
+
         app.run()
 
     except sqlite3.OperationalError:
-        if str(platform.system()).lower() == 'linux':
-            print('\n\nYou have sqlite3 error!\nEnter: "fuser my_account.session"\nAnd check number at end\nAnd type: "kill -9 <number in command fuser>"\n\n')
-        elif str(platform.system()).lower() == 'windows':
-            print('\n\nYou have sqlite3 error!\nOpen cmd and enter: taskkill /F /IM python.exe\n\n')
+        #if str(platform.system()).lower() == 'linux':
+        #    print('\n\nYou have sqlite3 error!\nEnter: "fuser my_account.session"\nAnd check number at end\nAnd type: "kill -9 <number in command fuser>"\n\n')
+        #elif str(platform.system()).lower() == 'windows':
+        #    print('\n\nYou have sqlite3 error!\nOpen cmd and enter: taskkill /F /IM python.exe\n\n')
+
+        print("\nYou have sqlite3 error! Don't be worry, we fix that")
+
+        for proc in psutil.process_iter():
+            if proc.name().startswith('python'):
+                currect_pid = os.getpid()
+                if proc.pid != currect_pid:
+                    print(f'Found another python instance with pid: {str(proc.pid)}, kill it!')
+                    proc.kill()
+
+        print('Restart userbot to fix sqlite3 error!')
+        restart()
+
 run()
