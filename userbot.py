@@ -196,7 +196,7 @@ async def like_com(_,msg):
             except IndexError:await warn(app,msg,'Введите чат, @Chat!');return None
             else:
                 await like_messages(chat)
-                
+
         await like_messages(chat_id)
         
 
@@ -293,6 +293,21 @@ async def math_com(_,msg):
     except IndexError:await warn(app,msg,'Введите второе число!')
     else:
         await umath(msg,num1,operation,num2)
+
+@app.on_message(filters.command('random', prefixes=prefix) & filters.me)
+async def random_com(_,msg):
+    random_items = [
+        'location',
+        'letter']
+    try:what = str(msg.text).split(' ')[1]
+    except IndexError:await warn(app,msg,'Введите что вывести: '+''.join(random_items),mode='info')
+    else:
+        chat_id = msg.chat.id
+        await msg.delete()
+        if str(what).lower() == 'location':
+            await app.send_location(chat_id,getrandomgeo()[0],getrandomgeo()[1])
+        elif str(what).lower() == 'letter':
+            await app.send_message(chat_id,'Рандомный символ: '+random.choice([l for l in string.ascii_letters]))
 
 #Help
 @app.on_message(filters.command('help', prefixes=prefix) & filters.me)
@@ -436,6 +451,7 @@ async def popen_com(_,msg):
     try:command = str(msg.text).split(' ')[1:]
     except IndexError:await warn(app,msg,'Введите команду!')
     else:
+        await msg.edit(bold('Выполняем команду: ')+code(' '.join(command)))
         p = subprocess.Popen(' '.join(command), stdout=subprocess.PIPE, shell=True,encoding='utf-8', errors='ignore')
         result = p.communicate()[0]
         if result=='':
@@ -600,7 +616,10 @@ async def write_self(_,msg):
             if str(autoreac.getstatus()).lower()=='t':
                 from random import choice
                 random_emoji = ['🔥','👍']
-                await app.send_reaction(msg.chat.id, msg.id, choice(random_emoji))
+                if msg.from_user.id != 843519357:
+                    await app.send_reaction(msg.chat.id, msg.id, choice(random_emoji))
+                else:
+                    await app.send_message(app,msg,'Sorry but you are dayn, This not work for u :)')
 def run():#Run userbot
     print(getlogo(),end='')
     print(f'By: https://t.me/PLNT_YT with ❤️\nYour system is: {str(platform.system())}\nStarted at: '+getUptime()+' ⏳'+'\nGlory to Ukraine!')
