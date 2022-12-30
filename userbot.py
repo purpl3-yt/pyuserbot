@@ -178,9 +178,6 @@ async def hackerstr_com(_,msg):
 @app.on_message(filters.command('like',prefixes=prefix) & filters.me)
 async def like_com(_,msg):
     chat_id = msg.chat.id
-    if msg.from_user.id != 843519357:
-        await warn(app,msg,'You are dayn!')
-        return None
 
     async def like_messages(chatid):
         count=0
@@ -619,10 +616,8 @@ async def write_self(_,msg):
             if str(autoreac.getstatus()).lower()=='t':
                 from random import choice
                 random_emoji = ['🔥','👍']
-                if msg.from_user.id != 843519357:
-                    await app.send_reaction(msg.chat.id, msg.id, choice(random_emoji))
-                else:
-                    await app.send_message(app,msg,'Sorry but you are dayn, This not work for u :)')
+                await app.send_reaction(msg.chat.id, msg.id, choice(random_emoji))
+                
 def run():#Run userbot
     print(getlogo(),end='')
     print(f'By: https://t.me/PLNT_YT with ❤️\nYour system is: {str(platform.system())}\nStarted at: '+getUptime()+' ⏳'+'\nGlory to Ukraine!')
