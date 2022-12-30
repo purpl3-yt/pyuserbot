@@ -2,3 +2,4 @@ pyrogram
 download
 requests
 gtts
+psutil

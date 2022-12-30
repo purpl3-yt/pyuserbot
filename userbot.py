@@ -11,6 +11,9 @@ import asyncio
 import psutil
 import sys
 
+code = lambda text : '<code>'+text+'</code>'
+bold = lambda text : '<b>'+text+'</b>'
+
 def getUptime():
     return datetime.now().strftime('%d/%m/%Y - %H:%M')
 
@@ -175,16 +178,27 @@ async def hackerstr_com(_,msg):
 @app.on_message(filters.command('like',prefixes=prefix) & filters.me)
 async def like_com(_,msg):
     chat_id = msg.chat.id
-    try:limit = str(msg.text).split(' ')[1]
-    except IndexError:await warn(app,msg,'Введите лимит (10,100,etc)!');return None
-    else:
+
+    async def like_messages(chatid):
         count=0
         await msg.delete()
-        async for message in app.get_chat_history(chat_id):
-            await app.send_reaction(chat_id,message.id,'👍')
+        async for message in app.get_chat_history(chatid):
+            await app.send_reaction(chatid,message.id,'👍')
             count+=1
             if count>=int(limit):
                 break
+
+    try:limit = str(msg.text).split(' ')[1]
+    except IndexError:await warn(app,msg,'Введите лимит (10,100,etc)!');return None
+    else:
+        if chat_id==msg.from_user.id:
+            try:chat = str(msg.text).split(' ')[2]
+            except IndexError:await warn(app,msg,'Введите чат, @Chat!');return None
+            else:
+                await like_messages(chat)
+                
+        await like_messages(chat_id)
+        
 
 @app.on_message(filters.command('spam', prefixes=prefix) & filters.me)
 async def spam_com(_, msg):
@@ -285,9 +299,6 @@ async def math_com(_,msg):
 async def help_com(_, msg):
     settings = [str(i[0])+' ' for i in settings_list.items()]
 
-    code = lambda text : '<code>'+text+'</code>'
-    bold = lambda text : '<b>'+text+'</b>'
-
     help_list = []
 
     help_list.append(bold('Настройки: ')+code(''.join(settings)))
@@ -332,6 +343,7 @@ async def help_com(_, msg):
     Command('rsky',None,'делает симуляцию разноцветного неба')
     Command('ню',None,'пересылает сообщение в облако',True)
     Command('getmsg',None,'выводит данные сообщения в консоль',True)
+    Command('get_users',None,'получить информацию об пользователях в чате')
     Command('stop',None,'останавливает процесс, например, когда ключена команда .count')
     Command('popen',['команда'],'выполняет команду в терминале')
     Command('del',None,'удаляет сообщение',True)
@@ -363,20 +375,54 @@ async def info_com(_,msg):
             lines+=len(data)
 
     text = f'''
-🐍 <b>PyUserBot</b>
-🗒 В юзерботе <b>{str(lines)}</b> строчек кода
-⏳ Аптайм: <b>{str(getUptime())}</b>
-⌨️ Префикс: <b>«</b><code>{prefix}</code><b>»</b>'''
+🐍 {bold("PyUserBot")}
+🗒 В юзерботе {bold(str(lines))} строчек кода
+⏳ Аптайм: {bold(str(getUptime()))}
+⌨️ Префикс: {bold("«")}{code(prefix)}{bold("»")}'''
 
     if platform.system().lower() == 'windows':
-        text+='\n🖥 Система: <b>Windows 🖼</b>'
+        text+=f'\n🖥 Система: {bold("Windows 🖼")}'
     elif platform.system().lower() == 'linux':
-        text+='\n🖥 Система: <b>Linux 🐧</b>'
+        text+=f'\n🖥 Система: {bold("Linux 🐧")}'
 
     text+='\n⚙️ <a href="https://github.com/purpl3-yt/pyuserbot">Код юзербота</a>'
 
     await app.send_animation(chat_id,'https://i.imgur.com/8fYJVyO.mp4',text)
 
+@app.on_message(filters.command('get_users',prefixes=prefix) & filters.me)
+async def get_users_com(_,msg):
+    await msg.edit('ℹ️ Получение информации...')
+    admins = []
+    try:
+        async for m in app.get_chat_members(msg.chat.id,filter=enums.ChatMembersFilter.ADMINISTRATORS):
+            admins.append(m)
+    except errors.exceptions.bad_request_400.ChannelInvalid:
+        await warn(app,msg,'Ошибка получения информации!');return None
+    bots = []
+    async for m in app.get_chat_members(msg.chat.id, filter=enums.ChatMembersFilter.BOTS):
+        bots.append(m)
+    
+    admin_privileges = False
+    
+    try:
+        banned = []
+        async for m in app.get_chat_members(msg.chat.id, filter=enums.ChatMembersFilter.BANNED):
+            admin_privileges = True
+            banned.append(m)
+    except errors.exceptions.bad_request_400.ChatAdminRequired:
+        admin_privileges = False
+        pass
+
+    text = f'''
+{bold("🤖 Ботов в чате: ")} {code(str(len(bots)))}
+{bold("🔨 Админов в чате: ")} {code(str(len(admins)))}'''
+
+    if admin_privileges:
+        text+=f'\n{bold("🚫 Забаненных в чате: ")} {code(str(len(banned)))}'
+    elif not admin_privileges:
+        text+=f"\n{bold('😭 Не удалось получить список забаненных!')}"
+
+    await msg.edit(text)
 
 @app.on_message(filters.command('python',prefixes=prefix) & filters.me)
 async def python_com(_,msg):
