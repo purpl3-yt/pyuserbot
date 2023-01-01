@@ -130,11 +130,15 @@ def getlogo():
 '''
     return header
 
+#Settings dict
+settings_list = {}
+
 #Classes
 class Setting:
     def __init__(self,name,status):
         self.name = name
         self.status = status
+        settings_list[name] = self
     def getname(self):
         return self.name
     def getstatus(self):

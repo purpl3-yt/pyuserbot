@@ -1,5 +1,6 @@
 settings.ini
-my_account.*
+*.session
+*.session*
 .vscode/
 __pycache__/
 test.py

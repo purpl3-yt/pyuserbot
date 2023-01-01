@@ -17,6 +17,12 @@ bold = lambda text : '<b>'+text+'</b>'
 def getUptime():
     return datetime.now().strftime('%d/%m/%Y - %H:%M')
 
+def clear():
+    if platform.system().lower() == 'windows':
+        os.system('cls')
+    else:
+        os.system('clear')
+
 os.chdir(sys.path[0])
 
 def restart():
@@ -39,7 +45,6 @@ htext = f
 hide = f
 autoreac = f
 tts = f
-font = f
     ''')
     print('Created config!\nFill api_id and api_hash')
     sys.exit()
@@ -47,7 +52,7 @@ font = f
 config.read(r'./settings.ini')
 api_id = config.get('main','api_id')
 api_hash = config.get('main','api_hash')
-app = Client('my_account',api_id=api_id, api_hash=api_hash)
+app = Client('pyuserbot',api_id=api_id, api_hash=api_hash)
 
 #Settings
 try:
@@ -55,9 +60,8 @@ try:
     hideset = Setting('hide',config.get('main','hide'))
     autoreac = Setting('autoreac',config.get('main','autoreac'))
     ttsset = Setting('tts',config.get('main','tts'))
+    skullset = Setting('skull',config.get('main','skull'))
     prefix = str(config.get('main','prefix'))
-    #Settings dict
-    settings_list = {'htext':htext,'hide':hideset,'autoreac':autoreac,'tts':ttsset}
 except configparser.NoOptionError as e:
     option = str(e)
     option_start = int(str(option).find("No option '"))+len("No option '")
@@ -70,7 +74,6 @@ except configparser.NoOptionError as e:
 stop=False
 love_words = str(requests.get('https://pastebin.com/raw/ZSk4qP1d').text).split('\n')
 
-#System
 @app.on_message(filters.command('set', prefixes=prefix) & filters.me)
 async def set(_, msg):
     try:
@@ -103,10 +106,9 @@ async def set(_, msg):
         except IndexError:
             await warn(app,msg,'Введите настройку!')
 @app.on_message(filters.command('profile', prefixes=prefix) & filters.me)
-async def profile(_,msg):
+async def profile_com(_,msg):
     await getprofile(msg)
-#Commands
-#Messages
+
 @app.on_message(filters.command('type', prefixes=prefix) & filters.me)
 async def type_com(_, msg):
     orig_text = msg.text.split(' ', maxsplit=1)[1]
@@ -177,16 +179,27 @@ async def hackerstr_com(_,msg):
 
 @app.on_message(filters.command('like',prefixes=prefix) & filters.me)
 async def like_com(_,msg):
+    global stop
     chat_id = msg.chat.id
 
-    async def like_messages(chatid):
+    async def like_messages(chatid,user = None):
+        global stop
         count=0
         await msg.delete()
         async for message in app.get_chat_history(chatid):
-            await app.send_reaction(chatid,message.id,'👍')
+            if stop:
+                stop=False
+                break
+            if user != None:
+                if message.from_user.username == user:
+                    await app.send_reaction(chatid,message.id,'👍')
+            else:
+                await app.send_reaction(chatid,message.id,'👍')
             count+=1
             if count>=int(limit):
                 break
+    try:user = str(msg.text).split(' ')[2]
+    except IndexError:user = ''
 
     try:limit = str(msg.text).split(' ')[1]
     except IndexError:await warn(app,msg,'Введите лимит (10,100,etc)!');return None
@@ -197,8 +210,44 @@ async def like_com(_,msg):
             else:
                 await like_messages(chat)
 
-        await like_messages(chat_id)
-        
+        await like_messages(chat_id,user)
+
+@app.on_message(filters.command('tag_all',prefixes=prefix) & filters.me)
+async def tag_all_com(_,msg):
+    users = [
+        'admin',
+        'bot',
+        'all'
+    ]
+
+    async def work(m,mode,msg,users):
+        if mode.lower() == 'inmsg':
+            await app.send_message(msg.chat.id,' '.join(users))
+        elif mode.lower() == 'outmsg':
+            for u in users:
+                await app.send_message(msg.chat.id,u)
+
+    try:who = str(msg.text).split(' ')[1]
+    except IndexError:await warn(app,msg,'Введите кого тегать! '+', '.join(users));return None
+    try:mode = str(msg.text).split(' ')[2]
+    except IndexError:await warn(app,msg,'Введите режим! '+', '.join(['inmsg','outmsg']));return None
+    users = []
+    if who.lower() == 'admin':
+        async for m in app.get_chat_members(msg.chat.id,filter=enums.ChatMembersFilter.ADMINISTRATORS):
+            users.append('@'+m.user.username)
+        await work(m,mode,msg,users)
+    elif who.lower() == 'bot':
+        async for m in app.get_chat_members(msg.chat.id,filter=enums.ChatMembersFilter.BOTS):
+            users.append('@'+m.user.username)
+        await work(m,mode,msg,users)
+    elif who.lower() == 'banned':
+        async for m in app.get_chat_members(msg.chat.id,filter=enums.ChatMembersFilter.BANNED):
+            users.append('@'+m.user.username)
+        await work(m,mode,msg,users)
+    elif who.lower() == 'all':
+        async for m in app.get_chat_members(msg.chat.id):
+            users.append('@'+m.user.username)
+        await work(m,mode,msg,users)
 
 @app.on_message(filters.command('spam', prefixes=prefix) & filters.me)
 async def spam_com(_, msg):
@@ -348,7 +397,8 @@ async def help_com(_, msg):
     Command('rand',['первое число','второе число'],'генерирует рандомное число')
     Command('math',['первое число','оператор [+,-,/]','второе число'],'математика')
     Command('meme',['мем'],'отправляет мем')
-    Command('like',['лимит'],'лайкает сообщения')
+    Command('like',['лимит','пользователь "без @"'],'лайкает сообщения')
+    Command('tag_all',['кого','режим'],'тегает людей')
     Command('split',['текст'],'делает из текста, куча сообщений с 1 символом')
     Command('len',['текст'],'выводит длину текста (также вы можете ответить на сообщение)')
     Command('action',['действие'],'выполняет действие')
@@ -406,7 +456,7 @@ async def info_com(_,msg):
 
 @app.on_message(filters.command('get_users',prefixes=prefix) & filters.me)
 async def get_users_com(_,msg):
-    await msg.edit('ℹ️ Получение информации...')
+    await msg.edit(bold('ℹ️ Получение информации...'))
     admins = []
     try:
         async for m in app.get_chat_members(msg.chat.id,filter=enums.ChatMembersFilter.ADMINISTRATORS):
@@ -612,13 +662,18 @@ async def write_self(_,msg):
                     await msg.delete()        
                     voicetts.save('voice.mp3')
                     await app.send_voice(msg.chat.id,'voice.mp3')
+            elif str(skullset.getstatus()).lower()=='t':
+                if msg.text!=None:
+                    await msg.edit(msg.text+' 💀')
         elif msg.from_user.is_self == False:
             if str(autoreac.getstatus()).lower()=='t':
                 from random import choice
                 random_emoji = ['🔥','👍']
                 await app.send_reaction(msg.chat.id, msg.id, choice(random_emoji))
+        
                 
 def run():#Run userbot
+    clear()
     print(getlogo(),end='')
     print(f'By: https://t.me/PLNT_YT with ❤️\nYour system is: {str(platform.system())}\nStarted at: '+getUptime()+' ⏳'+'\nGlory to Ukraine!')
     try:
