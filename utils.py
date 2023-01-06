@@ -10,7 +10,7 @@ import requests
 import string
 import socket
 import struct
-import time
+import psutil
 stop=False
 config = configparser.ConfigParser()
 config.read(r'./settings.ini')

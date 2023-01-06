@@ -56,9 +56,10 @@ api_id = config.get('main','api_id')
 print('Get Api ID!')
 api_hash = config.get('main','api_hash')
 print('Get Api Hash!')
-app = Client('pyuserbot',api_id=api_id, api_hash=api_hash)
-print('Define Client!')
+app = Client('pyuserbot',api_id=api_id, api_hash=api_hash, device_model='PyUserBot')
+print('Create Client!')
 del api_id,api_hash#For security
+print('Deteled api_id and api_hash vars to security!')
 
 #Settings
 try:
@@ -68,12 +69,12 @@ try:
     ttsset = Setting('tts',config.get('main','tts'))
     skullset = Setting('skull',config.get('main','skull'))
     terminalset = Setting('terminal',config.get('main','terminal'))
+    nospaceset = Setting('nospace',config.get('main','nospace'))
     prefix = str(config.get('main','prefix'))
 except configparser.NoOptionError as e:
-    option = str(e)
-    option_start = int(str(option).find("No option '"))+len("No option '")
-    option_end = int(str(option).find("' in section"))
-    config.set('main',str(option[option_start:option_end]), 'f')
+    option_start = int(str(e).find("No option '"))+len("No option '")
+    option_end = int(str(e).find("' in section"))
+    config.set('main',str(e)[option_start:option_end], 'f')
     config.write(open('settings.ini','w'))
     print('Please wait we are creating settings for the config file!')
     restart()
@@ -419,7 +420,6 @@ async def help_com(_, msg: types.Message):
     Command('ню',None,'пересылает сообщение в облако',True)
     Command('getmsg',None,'выводит данные сообщения в консоль',True)
     Command('getusers',None,'получить информацию об пользователях в чате')
-    Command('download',['тип'],'скачивает разные файлы',True)
     Command('stop',None,'останавливает процесс, например, когда ключена команда .count')
     Command('popen',['команда'],'выполняет команду в терминале')
     Command('del',None,'удаляет сообщение',True)
@@ -506,30 +506,6 @@ async def get_users_com(_,msg: types.Message):
         text+=f"\n{bold('😭 Не удалось получить список забаненных!')}"
 
     await msg.edit(text)
-
-@app.on_message(filters.command('download',prefixes=prefix) & filters.me)
-async def download_com(_,msg: types.Message):
-
-    if msg.reply_to_message==None:
-        await warn(app,msg,'Вы должны ответить на сообщение!')
-        return None
-
-    things_to_download = [
-        'audio'
-    ]
-
-    try:what = str(msg.text).split(' ')[1]
-    except IndexError:await warn(app,msg,'Скачать что? '+' '.join(things_to_download),mode='info')
-    else:
-        if not os.path.isdir('./downloads'):
-            os.mkdir('./downloads')
-        if str(what).lower()=='audio':
-            if msg.reply_to_message.audio!=None:
-                audio = await app.download_media(msg.reply_to_message.audio.file_id)
-                print('Audio saved where pyuserbot folder!')
-            elif msg.reply_to_message.audio==None:
-                await warn(app,msg,'Ответьте на аудио файл!');await msg.delete();return None
-
 
 @app.on_message(filters.command('python',prefixes=prefix) & filters.me)
 async def python_com(_,msg: types.Message):
@@ -658,12 +634,14 @@ async def love_com(_,msg: types.Message):
         else:
             if gender == 'm':
                 await msg.edit(bold(str(random.choice(love_words)).capitalize())+' ❤️')
+            elif gender == 'w':
+                await warn(app,msg,'Пока-что нету!')
 
 @app.on_message(filters.command('update',prefixes=prefix) & filters.me)
 async def update_com(_,msg: types.Message):
-    await msg.edit('<code>Обновляюсь...</code>')
+    await msg.edit(bold('🕔 Обновляюсь...'))
     check_version(True)
-    await warn(app,msg,'Обновление прошло успешно, напишите .restart для перезагрузки.',mode='info')
+    await warn(app,msg,'✅ Обновление прошло успешно, напишите .restart для перезагрузки.',mode='info')
 
 @app.on_message(filters.command('restart',prefixes=prefix) & filters.me)
 async def restart_com(_,msg: types.Message):
@@ -704,11 +682,16 @@ async def write_self(_,msg: types.Message):
             elif str(terminalset.getstatus()).lower()=='t':
                 if msg.text!=None:
                     msg2 = msg;msg2.text = '.popen '+msg.text;await popen_com(_,msg)
+            elif str(nospaceset.getstatus()).lower()=='t':
+                if msg.text!=None:
+                    try:
+                        await msg.edit(str(msg.text).replace(' ',''))
+                    except errors.exceptions.bad_request_400.MessageNotModified:
+                        pass
+
         elif msg.from_user.is_self == False:
             if str(autoreac.getstatus()).lower()=='t':
-                from random import choice
-                random_emoji = ['🔥','👍']
-                await app.send_reaction(msg.chat.id, msg.id, choice(random_emoji))
+                await app.send_reaction(msg.chat.id, msg.id, random.choice(['🔥','👍']))
         
                 
 def run():#Run userbot
