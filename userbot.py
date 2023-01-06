@@ -1,4 +1,4 @@
-from pyrogram import errors, enums, Client, idle
+from pyrogram import errors, enums, Client
 from datetime import datetime
 from gtts import gTTS
 from utils import *
@@ -10,7 +10,6 @@ import sqlite3
 import asyncio
 import psutil
 import sys
-
 code = lambda text : '<code>'+text+'</code>'
 bold = lambda text : '<b>'+text+'</b>'
 
@@ -22,6 +21,8 @@ def clear():
         os.system('cls')
     else:
         os.system('clear')
+
+clear()
 
 os.chdir(sys.path[0])
 
@@ -50,9 +51,14 @@ tts = f
     sys.exit()
 
 config.read(r'./settings.ini')
+print('Read config!')
 api_id = config.get('main','api_id')
+print('Get Api ID!')
 api_hash = config.get('main','api_hash')
+print('Get Api Hash!')
 app = Client('pyuserbot',api_id=api_id, api_hash=api_hash)
+print('Define Client!')
+del api_id,api_hash#For security
 
 #Settings
 try:
@@ -61,6 +67,7 @@ try:
     autoreac = Setting('autoreac',config.get('main','autoreac'))
     ttsset = Setting('tts',config.get('main','tts'))
     skullset = Setting('skull',config.get('main','skull'))
+    terminalset = Setting('terminal',config.get('main','terminal'))
     prefix = str(config.get('main','prefix'))
 except configparser.NoOptionError as e:
     option = str(e)
@@ -68,14 +75,15 @@ except configparser.NoOptionError as e:
     option_end = int(str(option).find("' in section"))
     config.set('main',str(option[option_start:option_end]), 'f')
     config.write(open('settings.ini','w'))
-    print('Please wait we are creating settings for the config file')
+    print('Please wait we are creating settings for the config file!')
     restart()
 
 stop=False
 love_words = str(requests.get('https://pastebin.com/raw/ZSk4qP1d').text).split('\n')
+print('Words for command "loveword" collected!')
 
 @app.on_message(filters.command('set', prefixes=prefix) & filters.me)
-async def set(_, msg):
+async def set(_, msg: types.Message):
     try:
         what = msg.text.split(' ')[1]
     except IndexError:
@@ -106,25 +114,25 @@ async def set(_, msg):
         except IndexError:
             await warn(app,msg,'Введите настройку!')
 @app.on_message(filters.command('profile', prefixes=prefix) & filters.me)
-async def profile_com(_,msg):
+async def profile_com(_,msg: types.Message):
     await getprofile(msg)
 
 @app.on_message(filters.command('type', prefixes=prefix) & filters.me)
-async def type_com(_, msg):
+async def type_com(_, msg: types.Message):
     orig_text = msg.text.split(' ', maxsplit=1)[1]
     tbp = ''
     while True:
         for i in text_animation(orig_text):
             try:
                 await msg.edit(i+'</b>')
-            except FloodWait as wait:
+            except errors.FloodWait as wait:
                 await asyncio.sleep(0.05)
             tbp = i
             await asyncio.sleep(0.05)
         break
 
 @app.on_message(filters.command('split', prefixes=prefix) & filters.me)
-async def split_com(_,msg):
+async def split_com(_,msg: types.Message):
     try:text_to_check = str(msg.text).split(' ')[1]
     except IndexError:await warn(app,msg,'Введите текст!')
     text = str(msg.text).split(' ')[1:]
@@ -149,7 +157,7 @@ async def split_com(_,msg):
     await send_frame()
 
 @app.on_message(filters.command('len',prefixes=prefix) & filters.me)
-async def len_com(_,msg):
+async def len_com(_,msg: types.Message):
     async def send():
         len_text = msg.text
         if msg.reply_to_message != None:
@@ -166,7 +174,7 @@ async def len_com(_,msg):
     else:
         await send()
 @app.on_message(filters.command('hackerstr', prefixes=prefix) & filters.me)
-async def hackerstr_com(_,msg):
+async def hackerstr_com(_,msg: types.Message):
     try:
         lenght = msg.text.split(' ', maxsplit=1)[1]
     except IndexError:
@@ -178,7 +186,7 @@ async def hackerstr_com(_,msg):
             await warn(app,msg,'Сообщение слишком длинное!')
 
 @app.on_message(filters.command('like',prefixes=prefix) & filters.me)
-async def like_com(_,msg):
+async def like_com(_,msg: types.Message):
     global stop
     chat_id = msg.chat.id
 
@@ -212,8 +220,8 @@ async def like_com(_,msg):
 
         await like_messages(chat_id,user)
 
-@app.on_message(filters.command('tag_all',prefixes=prefix) & filters.me)
-async def tag_all_com(_,msg):
+@app.on_message(filters.command('tagall',prefixes=prefix) & filters.me)
+async def tag_all_com(_,msg: types.Message):
     users = [
         'admin',
         'bot',
@@ -226,6 +234,9 @@ async def tag_all_com(_,msg):
         elif mode.lower() == 'outmsg':
             for u in users:
                 await app.send_message(msg.chat.id,u)
+
+    if msg.chat.type != enums.ChatType.GROUP:
+        await warn(app,msg,'Эту команду можно выполнить только в группе!');return None
 
     try:who = str(msg.text).split(' ')[1]
     except IndexError:await warn(app,msg,'Введите кого тегать! '+', '.join(users));return None
@@ -250,7 +261,7 @@ async def tag_all_com(_,msg):
         await work(m,mode,msg,users)
 
 @app.on_message(filters.command('spam', prefixes=prefix) & filters.me)
-async def spam_com(_, msg):
+async def spam_com(_, msg: types.Message):
     await msg.delete()
     try:
         spam_count = msg.text.split(' ')[1]
@@ -263,7 +274,7 @@ async def spam_com(_, msg):
         await msg.delete()
 
 @app.on_message(filters.command('tts', prefixes=prefix) & filters.me)
-async def tts_com(_, msg):
+async def tts_com(_, msg: types.Message):
     from gtts import gTTS
     try:lang = str(msg.text).split(' ')[1]
     except IndexError:
@@ -282,12 +293,12 @@ async def tts_com(_, msg):
             await app.send_voice(msg.chat.id,'voice.mp3')
 
 @app.on_message(filters.command('hide', prefixes=prefix) & filters.me)
-async def hide_com(_, msg):
+async def hide_com(_, msg: types.Message):
     await msg.edit('||'+msg.text[4:]+'||')
 
 #Misc
 @app.on_message(filters.command('hack', prefixes=prefix) & filters.me)
-async def hack_com(_, msg):
+async def hack_com(_, msg: types.Message):
     user = msg.text.split(' ',maxsplit=1)[1]
     await msg.edit('Начинаю взлом...')
     await asyncio.sleep(1)
@@ -297,7 +308,7 @@ async def hack_com(_, msg):
     await msg.edit(f'{user} успешно взломан!\nАйпи: {getrandomip()}\nГеолокация: {getrandomgeo()}\nHWID: {getrandomhwid()}')
 
 @app.on_message(filters.command('rand',prefixes=prefix) & filters.me)
-async def rand_com(_,msg):
+async def rand_com(_,msg: types.Message):
     from random import randint
     try:
         nums = (msg.text).split(' ')[1:]
@@ -309,15 +320,15 @@ async def rand_com(_,msg):
         await warn(app,msg,'Второе число должно быть не больше первого.',False)
 
 @app.on_message(filters.command('count',prefixes=prefix) & filters.me)
-async def count_com(_,msg):
+async def count_com(_,msg: types.Message):
     await count_anim(msg)
 
 @app.on_message(filters.command('rsky',prefixes=prefix) & filters.me)
-async def rsky_com(_,msg):
+async def rsky_com(_,msg: types.Message):
     await usky(msg)
 
 @app.on_message(filters.command('meme',prefixes=prefix) & filters.me)
-async def meme_com(_,msg):
+async def meme_com(_,msg: types.Message):
     try:category = str(msg.text).split(' ')[1]
     except IndexError:await warn(app,msg,','.join(umemes.keys()),mode='info');return None
     try:meme = str(msg.text).split(' ')[2]
@@ -333,7 +344,7 @@ async def meme_com(_,msg):
                 break
 
 @app.on_message(filters.command('math', prefixes=prefix) & filters.me)
-async def math_com(_,msg):
+async def math_com(_,msg: types.Message):
     try:num1 = str(msg.text).split(' ')[1]
     except IndexError:await warn(app,msg,'Введите первое число!')
     try:operation = str(msg.text).split(' ')[2]
@@ -344,7 +355,7 @@ async def math_com(_,msg):
         await umath(msg,num1,operation,num2)
 
 @app.on_message(filters.command('random', prefixes=prefix) & filters.me)
-async def random_com(_,msg):
+async def random_com(_,msg: types.Message):
     random_items = [
         'location',
         'letter']
@@ -360,7 +371,7 @@ async def random_com(_,msg):
 
 #Help
 @app.on_message(filters.command('help', prefixes=prefix) & filters.me)
-async def help_com(_, msg):
+async def help_com(_, msg: types.Message):
     settings = [str(i[0])+' ' for i in settings_list.items()]
 
     help_list = []
@@ -368,7 +379,6 @@ async def help_com(_, msg):
     help_list.append(bold('Настройки: ')+code(''.join(settings)))
 
     class Command:
-
         def __init__(self,name,args,desc,reply=False):
             self.name = name
             self.args = args
@@ -398,7 +408,7 @@ async def help_com(_, msg):
     Command('math',['первое число','оператор [+,-,/]','второе число'],'математика')
     Command('meme',['мем'],'отправляет мем')
     Command('like',['лимит','пользователь "без @"'],'лайкает сообщения')
-    Command('tag_all',['кого','режим'],'тегает людей')
+    Command('tagall',['кого','режим'],'тегает людей')
     Command('split',['текст'],'делает из текста, куча сообщений с 1 символом')
     Command('len',['текст'],'выводит длину текста (также вы можете ответить на сообщение)')
     Command('action',['действие'],'выполняет действие')
@@ -408,7 +418,8 @@ async def help_com(_, msg):
     Command('rsky',None,'делает симуляцию разноцветного неба')
     Command('ню',None,'пересылает сообщение в облако',True)
     Command('getmsg',None,'выводит данные сообщения в консоль',True)
-    Command('get_users',None,'получить информацию об пользователях в чате')
+    Command('getusers',None,'получить информацию об пользователях в чате')
+    Command('download',['тип'],'скачивает разные файлы',True)
     Command('stop',None,'останавливает процесс, например, когда ключена команда .count')
     Command('popen',['команда'],'выполняет команду в терминале')
     Command('del',None,'удаляет сообщение',True)
@@ -423,12 +434,12 @@ async def help_com(_, msg):
     await msg.edit("<u>-- <a href='https://github.com/purpl3-yt/pyuserbot'>PyUserBot's</a> help menu --</u>"+'\n'+''.join(help_list),disable_web_page_preview=True)
 
 @app.on_message(filters.command('stop',prefixes=prefix) & filters.me)
-async def stop_com(_,msg):
+async def stop_com(_,msg: types.Message):
     changestop(True)
     await msg.delete()
 
 @app.on_message(filters.command('info',prefixes=prefix) & filters.me)
-async def info_com(_,msg):
+async def info_com(_,msg: types.Message):
     chat_id = msg.chat.id
     await msg.delete()
     lines_files = ['userbot.py','utils.py','main.py']
@@ -438,12 +449,19 @@ async def info_com(_,msg):
             data = py_file.read()
             data = data.split('\n')
             lines+=len(data)
+    count_commands = 0
+    with open('userbot.py','r',errors='ignore') as userbot:
+        data = userbot.read();data = data.split('\n')
+        for line in data:
+            if line.find('@app.on_message(filters.command')!=-1:
+                count_commands+=1
 
     text = f'''
 🐍 {bold("PyUserBot")}
-🗒 В юзерботе {bold(str(lines))} строчек кода
+🗒 Кол-во строчек кода: {bold(str(lines))}
 ⏳ Аптайм: {bold(str(getUptime()))}
-⌨️ Префикс: {bold("«")}{code(prefix)}{bold("»")}'''
+⌨️ Префикс: {bold("«")}{code(prefix)}{bold("»")}
+🖋 Всего команд: {bold(str(count_commands))}'''
 
     if platform.system().lower() == 'windows':
         text+=f'\n🖥 Система: {bold("Windows 🖼")}'
@@ -454,8 +472,8 @@ async def info_com(_,msg):
 
     await app.send_animation(chat_id,'https://i.imgur.com/8fYJVyO.mp4',text)
 
-@app.on_message(filters.command('get_users',prefixes=prefix) & filters.me)
-async def get_users_com(_,msg):
+@app.on_message(filters.command('getusers',prefixes=prefix) & filters.me)
+async def get_users_com(_,msg: types.Message):
     await msg.edit(bold('ℹ️ Получение информации...'))
     admins = []
     try:
@@ -489,18 +507,46 @@ async def get_users_com(_,msg):
 
     await msg.edit(text)
 
+@app.on_message(filters.command('download',prefixes=prefix) & filters.me)
+async def download_com(_,msg: types.Message):
+
+    if msg.reply_to_message==None:
+        await warn(app,msg,'Вы должны ответить на сообщение!')
+        return None
+
+    things_to_download = [
+        'audio'
+    ]
+
+    try:what = str(msg.text).split(' ')[1]
+    except IndexError:await warn(app,msg,'Скачать что? '+' '.join(things_to_download),mode='info')
+    else:
+        if not os.path.isdir('./downloads'):
+            os.mkdir('./downloads')
+        if str(what).lower()=='audio':
+            if msg.reply_to_message.audio!=None:
+                audio = await app.download_media(msg.reply_to_message.audio.file_id)
+                print('Audio saved where pyuserbot folder!')
+            elif msg.reply_to_message.audio==None:
+                await warn(app,msg,'Ответьте на аудио файл!');await msg.delete();return None
+
+
 @app.on_message(filters.command('python',prefixes=prefix) & filters.me)
-async def python_com(_,msg):
+async def python_com(_,msg: types.Message):
     run = str(msg.text).split(' ')[1:]
     eval_output = eval(' '.join(run))
 
     await msg.edit(eval_output)
 
 @app.on_message(filters.command('popen',prefixes=prefix) & filters.me)
-async def popen_com(_,msg):
+async def popen_com(_,msg: types.Message):
     try:command = str(msg.text).split(' ')[1:]
     except IndexError:await warn(app,msg,'Введите команду!')
     else:
+
+        if r'.*.session.*' in ' '.join(command):
+            await warn(app,msg,'Не делайте ничего с .session файлами!');return None
+
         await msg.edit(bold('Выполняем команду: ')+code(' '.join(command)))
         p = subprocess.Popen(' '.join(command), stdout=subprocess.PIPE, shell=True,encoding='utf-8', errors='ignore')
         result = p.communicate()[0]
@@ -512,7 +558,7 @@ async def popen_com(_,msg):
             with open('result.txt','w',encoding='utf-8') as result_file:
                 result_file.write(result)
             
-            await app.send_document(msg.chat.id,'./result.txt',caption='💪 Вывод большой так что он будет файлом!')
+            await app.send_document(msg.chat.id,'./result.txt',caption=bold('Вывод большой так что он будет файлом!'))
             await msg.delete()
             
             os.remove('./result.txt')
@@ -522,7 +568,7 @@ async def popen_com(_,msg):
         await msg.edit('<code>'+result+'</code>')
 
 @app.on_message(filters.command('prefix',prefixes=prefix) & filters.me)
-async def prefix_com(_,msg):
+async def prefix_com(_,msg: types.Message):
     global prefix
     try:new_prefix = str(msg.text).split(' ')[1]
     
@@ -531,13 +577,12 @@ async def prefix_com(_,msg):
     
     else:
         
-        for s in [string.ascii_letters,string.digits,'(',')','=','_']:
-            if new_prefix in s:
-                await warn(app,msg,'Такой префикс поставить нельзя!')
-                return None
+        if len(new_prefix)>2:
+            await warn(app,msg,'Префикс должен быть не больше 2 символов!')
+            return None
 
-        if len(new_prefix)>1:
-            await warn(app,msg,'Префикс должен быть не больше 1 символа!')
+        if not new_prefix in r'[^a-zA-Zа-я-А-Я1-90;{}_+=|<>\" \[ \] \: \' \, \(\) \s]':
+            await warn(app,msg,'Такой префикс поставить нельзя!')
             return None
 
         prefix = str(new_prefix)
@@ -550,20 +595,20 @@ async def prefix_com(_,msg):
         restart()
 
 @app.on_message(filters.command('del',prefixes=prefix) & filters.me)
-async def delete_com(_,msg):
+async def delete_com(_,msg: types.Message):
     if msg.from_user.is_self==True:
         await app.delete_messages(msg.chat.id,msg.reply_to_message_id)
         await msg.delete()
     elif msg.from_user.is_self==False:
         await warn(app,msg,'Это не ваше сообщение.',False)
-
+        
 @app.on_message(filters.command('getmsg',prefixes=prefix) & filters.me)
-async def getmsg_com(_,msg):
+async def getmsg_com(_,msg: types.Message):
     print(msg)
     await warn(app,msg,'Данные выведены в консоль.',False,mode='info')
 
 @app.on_message(filters.command('online',prefixes=prefix) & filters.me)
-async def online_com(_,msg):
+async def online_com(_,msg: types.Message):
     global stoponline
     await warn(app,msg,'Always Online',mode='info')
     while True:
@@ -575,13 +620,13 @@ async def online_com(_,msg):
             stoponline=False
             break
 @app.on_message(filters.command('offline',prefixes=prefix) & filters.me)
-async def offline_com(_,msg):
+async def offline_com(_,msg: types.Message):
     global stoponline
     await warn(app,msg,'Постоянный онлайн выключен.',mode='info')
     stoponline=True
 
 @app.on_message(filters.command('action',prefixes=prefix) & filters.me)
-async def action_com(_,msg):
+async def action_com(_,msg: types.Message):
     chat_id = msg.chat.id
 
     actions = {
@@ -603,8 +648,8 @@ async def action_com(_,msg):
 
         await sleep(random.randint(30,60))
 
-@app.on_message(filters.command('love_word',prefixes=prefix) & filters.me)#idea by my gf, zen1tliks
-async def love_com(_,msg):
+@app.on_message(filters.command('loveword',prefixes=prefix) & filters.me)#idea by my gf, zen1tliks
+async def love_com(_,msg: types.Message):
     try:gender = str(msg.text).split(' ')[1]
     except IndexError:await warn(app,msg,'Выберите пол, [m,w]!');return None
     else:
@@ -612,22 +657,22 @@ async def love_com(_,msg):
             await warn(app,msg,'Выберите пол, [m,w]!');return None
         else:
             if gender == 'm':
-                await msg.edit(random.choice(love_words))
+                await msg.edit(bold(str(random.choice(love_words)).capitalize())+' ❤️')
 
 @app.on_message(filters.command('update',prefixes=prefix) & filters.me)
-async def update_com(_,msg):
+async def update_com(_,msg: types.Message):
     await msg.edit('<code>Обновляюсь...</code>')
     check_version(True)
     await warn(app,msg,'Обновление прошло успешно, напишите .restart для перезагрузки.',mode='info')
 
 @app.on_message(filters.command('restart',prefixes=prefix) & filters.me)
-async def restart_com(_,msg):
+async def restart_com(_,msg: types.Message):
     await warn(app,msg,'Перезагружаюсь, подождите пару секунд...',mode='info')
 
     restart()
 
 @app.on_message(filters.command('ню',prefixes=prefix) & filters.me)
-async def ny_com(_,msg):
+async def ny_com(_,msg: types.Message):
     try:
         await app.delete_messages(msg.chat.id,msg.id)
         await app.forward_messages('me',msg.chat.id,msg.reply_to_message.id)
@@ -635,36 +680,30 @@ async def ny_com(_,msg):
         await app.delete_messages(msg.chat.id,msg.id)
 
 @app.on_message(filters.command('quit',prefixes=prefix) & filters.me)
-async def quit_com(_,msg):
+async def quit_com(_,msg: types.Message):
     await warn(app,msg,'Выключаюсь...',mode='info')
 
     quit()
 
 #On messages
 @app.on_message(filters.all | filters.me | filters.private)
-async def write_self(_,msg):
+async def write_self(_,msg: types.Message):
     if msg.from_user!=None:
         global htext,hideset,tts
         if msg.from_user.is_self == True:
             if str(htext.getstatus()).lower()=='t':
-                while True:
-                    for i in text_animation(msg.text):
-                        await msg.edit(i)
-                        tbp = i
-                        await asyncio.sleep(0.03)
-                    break
+                msg2 = msg;msg2.text = '.type '+msg.text;await type_com(_,msg2)
             elif str(hideset.getstatus()).lower()=='t':
                 await msg.edit('||'+msg.text[4:]+'||')
             elif str(ttsset.getstatus()).lower()=='t':
                 if msg.text!=None:
-                    text = str(msg.text).split(' ')[0:]
-                    voicetts = gTTS(str(' '.join(text)),lang='ru')
-                    await msg.delete()        
-                    voicetts.save('voice.mp3')
-                    await app.send_voice(msg.chat.id,'voice.mp3')
+                    msg2 = msg;msg2.text = '.tts ru '+msg.text;await tts_com(_,msg2)
             elif str(skullset.getstatus()).lower()=='t':
                 if msg.text!=None:
                     await msg.edit(msg.text+' 💀')
+            elif str(terminalset.getstatus()).lower()=='t':
+                if msg.text!=None:
+                    msg2 = msg;msg2.text = '.popen '+msg.text;await popen_com(_,msg)
         elif msg.from_user.is_self == False:
             if str(autoreac.getstatus()).lower()=='t':
                 from random import choice
@@ -673,9 +712,12 @@ async def write_self(_,msg):
         
                 
 def run():#Run userbot
-    clear()
     print(getlogo(),end='')
-    print(f'By: https://t.me/PLNT_YT with ❤️\nYour system is: {str(platform.system())}\nStarted at: '+getUptime()+' ⏳'+'\nGlory to Ukraine!')
+    print(f'''
+By: https://t.me/PLNT_YT with ❤️
+Your system is: {str(platform.system())}
+Started at: {getUptime()} ⏳
+Glory to Ukraine!''')
     try:
 
         app.run()

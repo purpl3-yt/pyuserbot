@@ -43,19 +43,6 @@ def check_version(force=False):
     elif force:
         update()
 
-def check_run():
-    times = 0
-
-    while True:
-        time.sleep(2)
-        print(1)
-        if times>=5:
-            return False 
-        
-        if os.path.isfile('./my_account.session-journal'):
-            return True
-
-
 def text_animation(text):
     symbols = ['*','@','#','$','%','^','&','&']
     temp = text
@@ -139,6 +126,7 @@ class Setting:
         self.name = name
         self.status = status
         settings_list[name] = self
+        print('Define new setting: '+name)
     def getname(self):
         return self.name
     def getstatus(self):
@@ -306,12 +294,13 @@ meme_say = Meme('Say','Emote','CAACAgIAAxkDAAECn1pjq2uYVLVivetbuhSBo10-CGivWwACL
 meme_wow = Meme('Wow','Emote','CAACAgIAAxkDAAECoM1jq3UWPPAl9TKeXdyzfnhJj1V0ZgACdRUAAneE2EtBa1RDx5PwIR4E')
 meme_artem = Meme('Artem','Item','CAACAgIAAxkDAAECsuRjrhLFr79OuEc_aR3kNyMQ2c4LEQACKR0AAhoNCUnTlkTj29nSVB4E')
 
-umemes = {}
-for mem in memes:
-    try:
-        umemes[str(mem.getcategory()).lower()]
-    except KeyError:
-        umemes[str(mem.getcategory()).lower()] = []    
+umemes = {}#Memes Here
 
-for mem in memes:
-    umemes[str(mem.getcategory()).lower()].append(mem)
+for mem in memes:#Create Categoryes
+    try:
+        umemes[str(mem.getcategory()).lower()]#Get category
+    except KeyError:#If category not exist
+        umemes[str(mem.getcategory()).lower()] = [] #Create it
+
+for mem in memes:#For all memes
+    umemes[str(mem.getcategory()).lower()].append(mem)#Add meme to dict
