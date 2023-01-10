@@ -81,7 +81,9 @@ except configparser.NoOptionError as e:
 
 stop=False
 try:love_words = str(requests.get('https://pastebin.com/raw/ZSk4qP1d').text).split('\n');print('Words for command "loveword" collected!')
-except:love_words = ''
+except:love_words = '';print('Error to collect words for command "loveword"')
+try:russian_letters = list([l for l in str(requests.get('https://pastebin.com/raw/GxNExnSq').text)]);print('Russian letters collected')
+except:russian_letters = '';print('Error to collect russian letters')
 
 @app.on_message(filters.command('set', prefixes=prefix) & filters.me)
 async def set(_, msg: types.Message):
@@ -91,17 +93,14 @@ async def set(_, msg: types.Message):
         settings = []
         for i in settings_list.keys():
             settings.append(settings_list.get(i).getname()+': '+settings_list.get(i).getstatus())
-        await msg.edit(f'Все настройки: <code>{", ".join(settings)}</code>')
-        return None
+        await msg.edit(f'Все настройки: <code>{", ".join(settings)}</code>');return None
     try:
         status = msg.text.split(' ')[2]
     except IndexError:
-        await warn(app,msg,'Введите статус: (t,f) t - вкл f - выкл')
-        return None
+        await warn(app,msg,'Введите статус: (t,f) t - вкл f - выкл');return None
     try:
         if not status in ['t','f']:
-            await warn(app,msg,'Введите статус: (t,f) t - вкл f - выкл')
-            return None
+            await warn(app,msg,'Введите статус: (t,f) t - вкл f - выкл');return None
         config.set('main',str(what),str(status))
         config.write(open('settings.ini','w'))
         set = settings_list[what]
@@ -127,7 +126,7 @@ async def type_com(_, msg: types.Message):
             try:
                 await msg.edit(i+'</b>')
             except errors.FloodWait as wait:
-                await asyncio.sleep(0.05)
+                await asyncio.sleep(wait)
             tbp = i
             await asyncio.sleep(0.05)
         break
@@ -333,17 +332,19 @@ async def random_com(_,msg: types.Message):
     random_items = [
         'location',
         'letter',
+        'letters',
         'music']
     try:what = str(msg.text).split(' ')[1]
     except IndexError:await warn(app,msg,'Введите что вывести: '+' '.join(random_items),mode='info')
     else:
-
         chat_id = msg.chat.id
         await msg.delete()
         if str(what).lower() == 'location':
             await app.send_location(chat_id,getrandomgeo()[0],getrandomgeo()[1])
         elif str(what).lower() == 'letter':
-            await app.send_message(chat_id,'Рандомный символ: '+bold(str(random.choice([l for l in string.ascii_letters]))))
+            await app.send_message(chat_id,'Рандомный символ: '+bold(str(random.choice([l for l in string.ascii_letters]+russian_letters))))
+        elif str(what).lower() == 'letters':
+            await app.send_message(chat_id,'Рандомные символы: '+bold(''.join(random.choices([l for l in string.ascii_letters],k=int(random.randint(10,90))))))
         elif str(what).lower() == 'music':
             music_files = [m.id async for m in app.get_chat_history('@simplephonk') if m.audio!=None]
             await app.forward_messages(chat_id,'@simplephonk',random.choice(music_files))
@@ -530,12 +531,10 @@ async def prefix_com(_,msg: types.Message):
     else:
         
         if len(new_prefix)>2:
-            await warn(app,msg,'Префикс должен быть не больше 2 символов!')
-            return None
+            await warn(app,msg,'Префикс должен быть не больше 2 символов!');return None
 
         if not new_prefix in r'[^a-zA-Zа-я-А-Я1-90;{}_+=|<>\" \[ \] \: \' \, \(\) \s]':
-            await warn(app,msg,'Такой префикс поставить нельзя!')
-            return None
+            await warn(app,msg,'Такой префикс поставить нельзя!');return None
 
         prefix = str(new_prefix)
 
