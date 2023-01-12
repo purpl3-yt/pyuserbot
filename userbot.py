@@ -1,4 +1,4 @@
-from pyrogram import errors, enums, Client
+from pyrogram import errors, enums, Client, filters, types
 from datetime import datetime
 from gtts import gTTS
 from utils import *
@@ -120,16 +120,13 @@ async def profile_com(_,msg: types.Message):
 @app.on_message(filters.command('type', prefixes=prefix) & filters.me)
 async def type_com(_, msg: types.Message):
     orig_text = msg.text.split(' ', maxsplit=1)[1]
-    tbp = ''
-    while True:
-        for i in text_animation(orig_text):
-            try:
-                await msg.edit(i+'</b>')
-            except errors.FloodWait as wait:
-                await asyncio.sleep(wait)
-            tbp = i
-            await asyncio.sleep(0.05)
-        break
+
+    for i in text_animation(orig_text):
+        try:
+            await msg.edit(i+'</b>')
+        except errors.FloodWait as wait:
+            await asyncio.sleep(wait)
+        await sleep(0.05)
 
 @app.on_message(filters.command('split', prefixes=prefix) & filters.me)
 async def split_com(_,msg: types.Message):
@@ -292,6 +289,21 @@ async def hack_com(_, msg: types.Message):
     await asyncio.sleep(0.6)
     await msg.edit(f'{user} успешно взломан!\nАйпи: {getrandomip()}\nГеолокация: {getrandomgeo()}\nHWID: {getrandomhwid()}')
 
+@app.on_message(filters.command('stalk',prefixes=prefix) & filters.me)
+async def stalk_com(_,msg: types.Message):
+
+    async def warn_user():
+        await warn(app,msg,'Введите пользователя с @!')
+
+    try:user = str(msg.text).split(' ')[1]
+    except IndexError:await warn_user();return None
+    else:
+        
+        if not '@' in user:
+            await warn_user()
+        await msg.edit('Started!')
+        await stalk(msg,app,user)
+
 @app.on_message(filters.command('count',prefixes=prefix) & filters.me)
 async def count_com(_,msg: types.Message):
     await count_anim(msg)
@@ -346,10 +358,36 @@ async def random_com(_,msg: types.Message):
         elif str(what).lower() == 'letters':
             await app.send_message(chat_id,'Рандомные символы: '+bold(''.join(random.choices([l for l in string.ascii_letters],k=int(random.randint(10,90))))))
         elif str(what).lower() == 'music':
-            music_files = [m.id async for m in app.get_chat_history('@simplephonk') if m.audio!=None]
-            await app.forward_messages(chat_id,'@simplephonk',random.choice(music_files))
+            try:count = str(msg.text).split(' ')[2]
+            except IndexError:count = None
+            music_channels = ['@simplephonk','@proofnation','@phonk','@phonkhinakurory']
+            random_channel = random.choice(music_channels)
+            info_msg = await app.send_message(chat_id,bold('ℹ️ Сбор песен...'))
+            music_files = [m.id async for m in app.get_chat_history(random_channel) if m.audio!=None]
+            
+            async def send_random_music():
+                await app.forward_messages(chat_id,random_channel,random.choice(music_files))
+            
+            if count!=None:
+                for i in range(int(count)):
+                    await send_random_music()
+                await info_msg.delete()
+                return None
+            
+            await send_random_music()
+            await info_msg.delete()
 
-#Help
+@app.on_message(filters.command('readall', prefixes=prefix) & filters.me)
+async def readall_com(_,msg: types.Message):
+    async for dialog in app.get_dialogs():
+        await app.read_chat_history(dialog.chat.id)
+        
+        try:await msg.edit('Read chat: '+str(dialog.chat.title if dialog.chat.title != None else '?'))
+        
+        except errors.exceptions.bad_request_400.MessageNotModified:pass
+        
+        await sleep(1)
+#Help 
 @app.on_message(filters.command('help', prefixes=prefix) & filters.me)
 async def help_com(_, msg: types.Message):
     settings = [str(i[0])+' ' for i in settings_list.items()]
@@ -364,7 +402,7 @@ async def help_com(_, msg: types.Message):
             self.args = args
             self.desc = desc
             self.reply = reply
-            
+
             args_to_add = []
             
             if args==None:
@@ -394,9 +432,12 @@ async def help_com(_, msg: types.Message):
     Command('profile',None,'показывает профиль пользователя, если написать в ответ на сообщение другого пользователя можно также увидеть его профиль')
     Command('count',None,'считает 1000-1')
     Command('rsky',None,'делает симуляцию разноцветного неба')
+    Command('random',['что'],'выводит рандомные вещи')
+    Command('readall',None,'читает все сообщения')
     Command('ню',None,'пересылает сообщение в облако',True)
     Command('getmsg',None,'выводит данные сообщения в консоль',True)
     Command('getusers',None,'получить информацию об пользователях в чате')
+    Command('stalk',['пользователь'],'следит за пользователем')
     Command('stop',None,'останавливает процесс, например, когда ключена команда .count')
     Command('popen',['команда'],'выполняет команду в терминале')
     Command('del',None,'удаляет сообщение',True)
@@ -497,7 +538,7 @@ async def popen_com(_,msg: types.Message):
     except IndexError:await warn(app,msg,'Введите команду!')
     else:
 
-        if r'.*.session.*' in ' '.join(command):
+        if  ' '.join(command) in r'.*.session.*':
             await warn(app,msg,'Не делайте ничего с .session файлами!');return None
 
         await msg.edit(bold('Выполняем команду: ')+code(' '.join(command)))
@@ -678,6 +719,8 @@ Glory to Ukraine!''')
     try:
 
         app.run()
+
+        print('UserBot Stopped!')
 
     except sqlite3.OperationalError:
         #if str(platform.system()).lower() == 'linux':

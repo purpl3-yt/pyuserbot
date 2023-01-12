@@ -1,11 +1,12 @@
-from pyrogram.errors import FloodWait
+from pyrogram.errors import FloodWait,exceptions
 from download import download
 from os import execl, path
 from asyncio import sleep
-from pyrogram import *
+from json import dumps,loads
 import os,shutil,sys
 import math, random
 import configparser
+import pyrogram
 import requests
 import string
 import socket
@@ -157,7 +158,7 @@ class Meme:
     def getcategory(self):
         return self.category
 #For msgs
-async def warn(app,msg,warn: str,alt = False,delay = 3, mode = 'error'):
+async def warn(app: pyrogram.Client,msg: pyrogram.types.Message,warn: str,alt = False,delay = 3, mode = 'error'):
     if not alt:
         if mode=='error':
             await msg.edit('🚫 '+'<b>'+str(warn)+'</b>')
@@ -173,7 +174,7 @@ async def warn(app,msg,warn: str,alt = False,delay = 3, mode = 'error'):
         await sleep(delay)
         await warn_msg.delete()
 
-async def getprofile(msg):
+async def getprofile(msg: pyrogram.types.Message):
     with open('version.txt') as f:
         version = f.read()
 
@@ -210,7 +211,7 @@ async def getprofile(msg):
 🥸 Скам: <b>{is_scam}</b>
 🤖 Бот: <b>{is_bot}</b>''')
 
-async def disappear(msg,str: str,step: int):#For anim
+async def disappear(msg: pyrogram.types.Message,str: str,step: int):#For anim
     steps = []
     for i in range(0,len(str)+1,step):
         steps.append(str[:i])
@@ -222,7 +223,7 @@ async def disappear(msg,str: str,step: int):#For anim
         await sleep(0.1)
     await msg.delete()
 
-async def count_anim(msg):
+async def count_anim(msg: pyrogram.types.Message):
     global stop
     gh = 1000
     gh_list = []
@@ -232,7 +233,7 @@ async def count_anim(msg):
         gh_list.append(f'{str(i)} - 1 = {str(i-1)}')
     gh_list.reverse()
     for i in gh_list:
-        if stop==True:
+        if stop:
             await msg.delete()
             stop=False   
             break
@@ -242,7 +243,7 @@ async def count_anim(msg):
             await sleep(wait)
         await sleep(0.1)
 
-async def usky(msg):
+async def usky(msg: pyrogram.types.Message):
     global stop
     squares = ['🟥','🟧','🟨','🟩','🟦','🟪']
     def generateline():
@@ -251,7 +252,7 @@ async def usky(msg):
             anim.append(random.choice(squares))
         return anim
     for i in range(0,9):#symbols lenght
-        if stop==True:
+        if stop:
             await msg.delete()
             stop=False   
             break
@@ -271,6 +272,23 @@ async def umath(msg,num1,oper,num2,app=None):
         elif oper=='*':await msg.edit(int(num1)*int(num2))
     except ValueError:
         await warn(app,msg,'Введите числа а не буквы!')
+
+async def stalk(msg: pyrogram.types.Message, app: pyrogram.Client, user: str):
+    global stop
+    while True:
+        if stop:
+            await msg.delete()
+            stop=False
+            print('\nStalk Stop')
+            break
+        
+        user_info = await app.get_users(user)
+        try:
+            await msg.edit('<code>'+str(user_info)+'</code>')
+        except exceptions.bad_request_400.MessageNotModified:
+            pass
+
+        await sleep(5)
 
 #Memes
 meme_uno = Meme('Uno','Games',['CAACAgQAAxkBAAL2wWNZDQ9KquGC7PDmBeJz8zNUIZFAAAIFAAPVcf0xIvIu5opGXfMeBA','CAACAgQAAxkBAAL2w2NZDWTAis0LomAb4mndQmK5ZXb5AAIEAAPVcf0xXSRFIA9A-v4eBA','CAACAgQAAxkBAAL2xGNZDWSiIjvV-G3ItXZBB4TvBUzZAAIDAAPVcf0xtgnebiE3rAEeBA','CAACAgQAAxkBAAL2xWNZDWQuQdQsB3PkdZCsLb3hqHanAAICAAPVcf0x1qyFAAFPPAsOHgQ'])
